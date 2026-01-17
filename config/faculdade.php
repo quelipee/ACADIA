@@ -1,6 +1,7 @@
 <?php
     return [
-        'base_login' => env('FACUL_BASE_URL'),
+        'base_login' => env('FACUL_BASE_LOGIN_URL'),
+        'base_url' => env('FACUL_BASE_URL'),
 
         'credentials' => [
             'login' => env('APP_UNINTER_LOGIN'),
