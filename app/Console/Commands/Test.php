@@ -34,6 +34,7 @@ class Test extends Command
     public function handle()
     {
         $this->faculdade->signInAuthenticated();
-        dd($this->faculdade->getInfoGraduation());
+        $graduation = $this->faculdade->getInfoListGraduation();
+        $this->faculdade->courseMaterials($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
     }
 }

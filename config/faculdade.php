@@ -2,7 +2,7 @@
     return [
         'base_urls' => [
             'login' => env('FACUL_BASE_LOGIN_URL'),
-            'base_url' => env('FACUL_BASE_URL'),
+            'api' => env('FACUL_BASE_URL'),
         ],
 
         'credentials' => [
@@ -12,11 +12,7 @@
 
         'endpoints' => [
         'list_graduation' => 'ava/sistema/Curso/0/EscolaUsuario/true/?emCurso=true',
-        'atividades' => [
-            'listar'   => '/atividades',
-            'detalhe'  => '/atividades/{id}',
-            'responder'=> '/atividades/{id}/responder',
-            ],
+        'list_materials' => 'ava/ava/SalaVirtual/{idCourse}/CursoUsuarioPermissao/true/'
         ],
 
         'http' => [
