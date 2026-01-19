@@ -5,6 +5,7 @@ use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Infrastructure\Clients\Session\FaculdadeSession;
 use Exception;
 use Illuminate\Support\Facades\Http;
+use App\Domain\DTOs\GraduationDTO;
 
 class FaculdadeHttpClient implements FaculdadeClientInterface{
 
@@ -16,7 +17,7 @@ class FaculdadeHttpClient implements FaculdadeClientInterface{
     public function signInAuthenticated(): void
     {
         $response = Http::asForm()->
-        post(config('faculdade.base_login'),[
+        post(config('faculdade.base_urls.login'),[
             'login' => config('faculdade.credentials.login'),
             'senha' => config('faculdade.credentials.password')
         ]);
@@ -27,21 +28,25 @@ class FaculdadeHttpClient implements FaculdadeClientInterface{
     }
 
     public function client() {
-        return Http::baseUrl(config('faculdade.base_url'))
+        return Http::baseUrl(config('faculdade.base_urls.base_url'))
         ->withCookies(
             $this->session->getCookies(),
-            parse_url(config('faculdade.base_url'), PHP_URL_HOST)
+            parse_url(config('faculdade.base_urls.base_url'), PHP_URL_HOST)
         )->withHeaders($this->session->getHeaders());
     }
 
     public function getInfoGraduation() : array{
-        $response = $this->client()->get('ava/sistema/Curso/0/EscolaUsuario/true/?emCurso=true');
+        $response = $this->client()->get(config('faculdade.endpoints.list_graduation'));
         
+        // TODO ADJUST ISSO DE EXCEPTION
         if(!$response->successful()){
             throw new Exception($response->status());
         }
 
-        return $response['cursos'];
+        foreach ($response['cursos'] as $graduation) {
+            $list_graduation[] = GraduationDTO::validatedGraduationCourse($graduation);
+        }
+        return $list_graduation; 
     }
 
 }

@@ -47,4 +47,13 @@ trait ProfileValidationRules
                 : Rule::unique(User::class)->ignore($userId),
         ];
     }
+
+    /**
+     * Get the validation rules used to validate user id.
+     *
+     * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
+     */
+    protected function idRules() : array {
+        return ['required', 'string', 'min:1', 'max:255'];
+    }
 }
