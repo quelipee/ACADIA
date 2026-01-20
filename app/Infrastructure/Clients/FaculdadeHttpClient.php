@@ -59,6 +59,18 @@ class FaculdadeHttpClient implements FaculdadeClientInterface{
             'idUsuarioCurso' => $idUserCourse
         ]);
 
-        dd($response['salaVirtuais']);
+        return $response['salaVirtuais'];
     }
+
+    public function listStudentActivities(int $idSalaVirtual, int $idSalaVirtualOfertaAproveitamento) : array{
+        $response = $this->client()->get(config('faculdade.endpoints.list_activities'),[
+            'idSalaVirtual' => $idSalaVirtual,
+            'idSalaVirtualOferta' => $idSalaVirtualOfertaAproveitamento,
+        ]);
+
+        return $response['avaliacaoUsuarios'];
+    }
+
 }
+
+// paginacao/true?numRegistros=25&filtro=&ordenacao=&idSalaVirtual=80872&idSalaVirtualOferta=1005841

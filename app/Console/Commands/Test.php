@@ -35,6 +35,7 @@ class Test extends Command
     {
         $this->faculdade->signInAuthenticated();
         $graduation = $this->faculdade->getInfoListGraduation();
-        $this->faculdade->courseMaterials($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
+        $materials = $this->faculdade->courseMaterials($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
+        $this->faculdade->listStudentActivities($materials[2]['id'],$materials[2]['idSalaVirtualOfertaAproveitamento']);
     }
 }
