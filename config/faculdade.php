@@ -11,9 +11,10 @@
         ],
 
         'endpoints' => [
-        'list_graduation' => 'ava/sistema/Curso/0/EscolaUsuario/true/?emCurso=true',
-        'list_materials' => 'ava/ava/SalaVirtual/{idCourse}/CursoUsuarioPermissao/true/',
-        'list_activities' => 'ava/bqs/AvaliacaoUsuario/1/paginacao/true?numRegistros=25&filtro=&ordenacao=&idSalaVirtual={idSalaVirtual}&idSalaVirtualOferta={idSalaVirtualOferta}'
+            'list_graduation' => 'ava/sistema/Curso/0/EscolaUsuario/true/?emCurso=true',
+            'list_subjects' => 'ava/ava/SalaVirtual/{idCourse}/CursoUsuarioPermissao/true',
+            'list_activities' => 'ava/bqs/AvaliacaoUsuario/1/paginacao/true',
+            'list_questions' => 'ava/bqs/AvaliacaoUsuarioHistorico/{id}/Avaliacao?autorizacao='
         ],
 
         'http' => [

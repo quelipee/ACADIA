@@ -3,6 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Domain\Contracts\FaculdadeClientInterface;
+use App\Domain\Contracts\Academic\GraduationClientInterface;
+use App\Domain\Contracts\Academic\SubjectClientInterface;
+use App\Domain\Contracts\Assessment\ExamClientInterface;
+use App\Domain\Enums\ExamActivityType;
 use Illuminate\Console\Command;
 
 class Test extends Command
@@ -22,7 +26,10 @@ class Test extends Command
     protected $description = 'Command description';
 
     public function __construct(
-        protected FaculdadeClientInterface $faculdade
+        protected FaculdadeClientInterface $faculdade,
+        protected GraduationClientInterface $graduation,
+        protected SubjectClientInterface $subject,
+        protected ExamClientInterface $exam,
     )
     {
         return parent::__construct();
@@ -34,8 +41,9 @@ class Test extends Command
     public function handle()
     {
         $this->faculdade->signInAuthenticated();
-        $graduation = $this->faculdade->getInfoListGraduation();
-        $materials = $this->faculdade->courseMaterials($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
-        $this->faculdade->listStudentActivities($materials[2]['id'],$materials[2]['idSalaVirtualOfertaAproveitamento']);
+        $graduation = $this->graduation->getInfoListGraduation();
+        $subject  = $this->subject->courseSubject($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
+        $activities = $this->exam->listStudentActivity($subject[0]->id,$subject[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA->value);
+        $this->faculdade->naotemnome($activities[1]->id, $activities[1]->status);
     }
 }

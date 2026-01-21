@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Clients\Session;
+namespace App\Infrastructure\Http\Session;
 
 class FaculdadeSession {
     private array $cookies = [];
