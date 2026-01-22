@@ -4,7 +4,6 @@ namespace App\Concerns\Assessment;
 
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\DTOs\ActivitiesDTO;
-use App\Domain\Enums\ExamActivityType;
 
 trait HasAssessmentType {
 
@@ -13,7 +12,7 @@ trait HasAssessmentType {
     )
     {}
 
-    protected function HasAssessmentType(int $idSalaVirtual, int $idSalaVirtualOferta, string $type) {
+    protected function hasAssessmentType(int $idSalaVirtual, int $idSalaVirtualOferta, string $type) : array {
         $response = $this->http->client()->get(config('faculdade.endpoints.list_activities'),[
             'idSalaVirtual' => $idSalaVirtual,
             'idSalaVirtualOfertaAtual' => $idSalaVirtualOferta,

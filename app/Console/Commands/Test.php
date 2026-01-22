@@ -43,7 +43,7 @@ class Test extends Command
         $this->faculdade->signInAuthenticated();
         $graduation = $this->graduation->getInfoListGraduation();
         $subject  = $this->subject->courseSubject($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
-        $activities = $this->exam->listStudentActivity($subject[0]->id,$subject[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA->value);
-        $this->faculdade->naotemnome($activities[1]->id, $activities[1]->status);
+        $activities = $this->exam->listStudentActivity($subject[0]->id,$subject[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA);
+        $this->exam->fetchFormattedQuestion($activities[1]->id, $activities[1]->status);
     }
 }

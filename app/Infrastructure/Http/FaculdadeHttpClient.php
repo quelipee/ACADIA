@@ -40,6 +40,6 @@ class FaculdadeHttpClient implements FaculdadeClientInterface{
         );
         
         $response = $this->client()->get($endpoint);
-        dd($response['avaliacaoUsuarioHistoricos']);
+        dd($response['avaliacaoUsuarioHistoricos'][0]);
     }
 }

@@ -6,7 +6,6 @@ use App\Concerns\Assessment\HasAssessmentType;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\SubjectClientInterface;
 use App\Domain\DTOs\SubjectDTO;
-use App\Domain\Enums\ExamActivityType;
 
 class SubjectClient implements SubjectClientInterface{
     use HasAssessmentType;
@@ -30,14 +29,5 @@ class SubjectClient implements SubjectClientInterface{
         }
 
         return $list_subjects;
-    }
-    
-
-    //TODO AQUI DA PRA MUDAR E FAZER OUTRO TRAIT PARA REUTILIZAR E PEGAR SOMENTE AS PROVAS OU AS APOL's
-    // idSalaVirtualOfertaAtual É PARA SOMENTE PARA CURSOS FORA DA GRADUAÇÃO DO USUARIO, EX: CURSO DE INGLES ETC
-    public function listStudentActivity(int $idSalaVirtual, int $idSalaVirtualOferta) : array {
-
-        $eita = $this->HasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, ExamActivityType::MISTA->value);
-        dd($eita);
     }
 }
