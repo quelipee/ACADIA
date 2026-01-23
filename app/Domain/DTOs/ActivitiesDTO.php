@@ -21,7 +21,7 @@ readonly class ActivitiesDTO {
     )
     {}
 
-    public static function validatedActivities(array $request) : ActivitiesDTO {
+    public static function fromApi(array $request) : ActivitiesDTO {
         if(!$request['idAvaliacao']) {
             throw new InvalidArgumentException('Atividade não encontrada!!');
         }

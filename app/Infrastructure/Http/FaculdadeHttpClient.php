@@ -32,14 +32,4 @@ class FaculdadeHttpClient implements FaculdadeClientInterface{
             parse_url(config('faculdade.base_urls.api'), PHP_URL_HOST)
         )->withHeaders($this->session->getHeaders());
     }
-
-    public function naotemnome(string $id, string $status) : array{
-        $endpoint = str_replace(
-            '{id}', $id,
-            config('faculdade.endpoints.list_questions')
-        );
-        
-        $response = $this->client()->get($endpoint);
-        dd($response['avaliacaoUsuarioHistoricos'][0]);
-    }
 }

@@ -3,7 +3,7 @@ namespace App\Domain\DTOs;
 
 use InvalidArgumentException;
 
-readonly class SubjectDTO {
+readonly class DisciplinaDTO {
     public function __construct(
         public int $id,
         public string $cId,
@@ -14,7 +14,7 @@ readonly class SubjectDTO {
     )
     {}
 
-    public static function validatedSubject(array $request) : SubjectDTO {
+    public static function fromApi(array $request) : DisciplinaDTO {
         if (!$request['id']) {
             throw new InvalidArgumentException('Essa materia não existe!!');
         }

@@ -3,11 +3,11 @@
 namespace App\Infrastructure\Http\Academic;
 
 use App\Concerns\Assessment\HasAssessmentType;
+use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
-use App\Domain\Contracts\Academic\SubjectClientInterface;
-use App\Domain\DTOs\SubjectDTO;
+use App\Domain\DTOs\DisciplinaDTO;
 
-class SubjectClient implements SubjectClientInterface{
+class Disciplina implements DisciplinaClientInterface{
     use HasAssessmentType;
 
     public function __construct(
@@ -15,7 +15,7 @@ class SubjectClient implements SubjectClientInterface{
     )
     {}
 
-    public function courseSubject(int $idUserCourse, int $idCourse) : array { //disciplina do curso
+    public function courseDiscipline(int $idUserCourse, int $idCourse) : array { //disciplina do curso
         $endpoint = str_replace(
             '{idCourse}', $idCourse,
             config('faculdade.endpoints.list_subjects')
@@ -25,9 +25,9 @@ class SubjectClient implements SubjectClientInterface{
         ]);
         
         foreach ($response['salaVirtuais'] as $subject) {
-            $list_subjects[] = SubjectDTO::validatedSubject($subject);
+            $list_disciplina[] = DisciplinaDTO::fromApi($subject);
         }
 
-        return $list_subjects;
+        return $list_disciplina;
     }
 }

@@ -19,7 +19,7 @@ trait HasAssessmentType {
         ]);
         
         foreach ($response['avaliacaoUsuarios'] as $data) {
-            $list_activities[] = ActivitiesDTO::validatedActivities($data);
+            $list_activities[] = ActivitiesDTO::fromApi($data);
         }
         
         $list_activities = collect($list_activities)

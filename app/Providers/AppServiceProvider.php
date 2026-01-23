@@ -3,13 +3,13 @@
 namespace App\Providers;
 
 use App\Console\Commands\Test;
+use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\AIClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
-use App\Domain\Contracts\Academic\SubjectClientInterface;
 use App\Domain\Contracts\Assessment\ExamClientInterface;
+use App\Infrastructure\Http\Academic\Disciplina;
 use App\Infrastructure\Http\Academic\GraduationClient;
-use App\Infrastructure\Http\Academic\SubjectClient;
 use App\Infrastructure\Http\Assessment\ApolClient;
 use App\Infrastructure\Http\Assessment\ExamClient;
 use App\Infrastructure\Http\FaculdadeHttpClient;
@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(GraduationClientInterface::class, GraduationClient::class);
 
-        $this->app->bind(SubjectClientInterface::class, SubjectClient::class);
+        $this->app->bind(DisciplinaClientInterface::class, Disciplina::class);
         
     }
 

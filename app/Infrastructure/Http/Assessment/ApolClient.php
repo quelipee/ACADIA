@@ -3,12 +3,13 @@
 namespace App\Infrastructure\Http\Assessment;
 
 use App\Concerns\Assessment\HasAssessmentType;
+use App\Concerns\Assessment\HasQuestionFormatting;
 use App\Domain\Contracts\Assessment\ExamClientInterface;
 use App\Domain\Enums\ExamActivityType;
 use InvalidArgumentException;
 
 class ApolClient implements ExamClientInterface{
-    use HasAssessmentType;
+    use HasAssessmentType,HasQuestionFormatting;
     
     public function name() : string {
         return ExamActivityType::APOL->value;
@@ -22,6 +23,6 @@ class ApolClient implements ExamClientInterface{
     }
 
     public function fetchFormattedQuestion(string $id, string $status) {
-        // TODO
+        return $this->hasQuestionFormatting($id,$status);
     }
 }

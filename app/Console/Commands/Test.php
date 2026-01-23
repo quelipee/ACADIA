@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
 use App\Domain\Contracts\Academic\SubjectClientInterface;
@@ -28,7 +29,7 @@ class Test extends Command
     public function __construct(
         protected FaculdadeClientInterface $faculdade,
         protected GraduationClientInterface $graduation,
-        protected SubjectClientInterface $subject,
+        protected DisciplinaClientInterface $subject,
         protected ExamClientInterface $exam,
     )
     {
@@ -42,8 +43,9 @@ class Test extends Command
     {
         $this->faculdade->signInAuthenticated();
         $graduation = $this->graduation->getInfoListGraduation();
-        $subject  = $this->subject->courseSubject($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
+        $subject  = $this->subject->courseDiscipline($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
         $activities = $this->exam->listStudentActivity($subject[0]->id,$subject[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA);
-        $this->exam->fetchFormattedQuestion($activities[1]->id, $activities[1]->status);
+        $eita = $this->exam->fetchFormattedQuestion($activities[1]->id, $activities[1]->status);
+        dd($eita);
     }
 }

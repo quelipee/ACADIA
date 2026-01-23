@@ -23,6 +23,6 @@ class ExamClient implements ExamClientInterface{
     }
 
     public function fetchFormattedQuestion(string $id, string $status) {
-        $this->hasQuestionFormatting($id,$status);
+        return $this->hasQuestionFormatting($id,$status);
     }
 }

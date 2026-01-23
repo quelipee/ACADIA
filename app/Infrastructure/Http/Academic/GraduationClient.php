@@ -21,7 +21,7 @@ class GraduationClient implements GraduationClientInterface{
         }
         
         foreach ($response['cursos'] as $graduation) {
-            $list_graduation[] = GraduationDTO::validatedGraduationCourse($graduation);
+            $list_graduation[] = GraduationDTO::fromApi($graduation);
         }
 
         return $list_graduation; 

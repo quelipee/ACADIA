@@ -13,10 +13,8 @@ trait HasQuestionFormatting {
         );
         
         $response = $this->http->client()->get($endpoint);
-        dd($response['avaliacaoUsuarioHistoricos'][0]);
-
-        // NAO ESQUECER DISSO TBM
-        dd(QuestionDTO::validatedSubject($response['avaliacaoUsuarioHistoricos'][0]));
+        dd($response['avaliacaoUsuarioHistoricos']);
+        return QuestionDTO::fromApi($response['avaliacaoUsuarioHistoricos'][0]);
     }
 
 }

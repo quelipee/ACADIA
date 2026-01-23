@@ -16,15 +16,12 @@ readonly class QuestionDTO {
     )
     {}
 
-    public static function validatedSubject(array $request) : QuestionDTO {
-        if (!$request['id']) {
+    public static function fromApi(array $request) : QuestionDTO {
+        if (!isset($request['id'])) {
             throw new InvalidArgumentException('Essa materia não existe!!');
         }
 
         $questao = self::formattedText($request['questao']);
-        $sua = self::formattedAlternative($request['alternativas']);
-
-        dd($sua);
 
         return new self(
             id: $request['id'],
@@ -32,7 +29,7 @@ readonly class QuestionDTO {
             idQuestao: $request['idQuestao'],
             idQuestaoAlternativa: $request['idQuestaoAlternativa'],
             questao: $questao,
-            alternativas: $request['alternativas'],
+            alternativas: self::formattedAlternative($request['alternativas']),
         );
     }
 
@@ -52,14 +49,9 @@ readonly class QuestionDTO {
     }
 
     public static function formattedAlternative(array $request) {
-        //TODO AQUI TEM QUE AJUSTAR AINDA
-        return  collect($request)->map(function ($data) {
-            // dd($data);
-            return [
-                'id' => $data['id'],
-                'idQuestaoAlternativa' => $data['questaoAlternativaAtributos'][0]['idQuestaoAlternativa'],
-                'valor' => self::formattedText($data['questaoAlternativaAtributos'][0]['valor']),
-            ];
-        })->all();
+        
+        return  collect($request)
+        ->map(fn($data) => AlternativeDTO::fromApi($data))
+        ->all();
     }
 } 

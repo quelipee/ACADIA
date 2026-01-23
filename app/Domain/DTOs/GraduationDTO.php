@@ -17,7 +17,7 @@ class GraduationDTO {
     )
     {}
 
-    public static function validatedGraduationCourse(array $request) : GraduationDTO {
+    public static function fromApi(array $request) : GraduationDTO {
         
         if(!isset($request['id'])) {
                 throw new InvalidArgumentException('Error id não encontrado!!');
