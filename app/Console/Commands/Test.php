@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Application\Services\ResolverAssessmentService;
 use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
-use App\Domain\Contracts\Academic\SubjectClientInterface;
+use App\Domain\Contracts\AIClientInterface;
 use App\Domain\Contracts\Assessment\ExamClientInterface;
 use App\Domain\Enums\ExamActivityType;
 use Illuminate\Console\Command;
@@ -31,6 +32,8 @@ class Test extends Command
         protected GraduationClientInterface $graduation,
         protected DisciplinaClientInterface $subject,
         protected ExamClientInterface $exam,
+        protected AIClientInterface $client,
+        protected ResolverAssessmentService $service,
     )
     {
         return parent::__construct();
@@ -43,9 +46,8 @@ class Test extends Command
     {
         $this->faculdade->signInAuthenticated();
         $graduation = $this->graduation->getInfoListGraduation();
-        $subject  = $this->subject->courseDiscipline($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
-        $activities = $this->exam->listStudentActivity($subject[0]->id,$subject[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA);
-        $eita = $this->exam->fetchFormattedQuestion($activities[1]->id, $activities[1]->status);
-        dd($eita);
+        $disciplina  = $this->subject->courseDiscipline($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
+        $activities = $this->exam->listStudentActivity($disciplina[0]->id,$disciplina[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA);
+        $this->service->resolver($activities[0]->id, $activities[0]->cID, $activities[0]->tentativa);
     }
 }

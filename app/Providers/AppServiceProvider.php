@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Application\Services\ResolverAssessmentService;
 use App\Console\Commands\Test;
 use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\AIClientInterface;
@@ -13,6 +14,7 @@ use App\Infrastructure\Http\Academic\GraduationClient;
 use App\Infrastructure\Http\Assessment\ApolClient;
 use App\Infrastructure\Http\Assessment\ExamClient;
 use App\Infrastructure\Http\FaculdadeHttpClient;
+use App\Infrastructure\Http\GeminiClient;
 use App\Infrastructure\Http\OpenAIClient;
 use App\Infrastructure\Http\Session\FaculdadeSession;
 use Carbon\CarbonImmutable;
@@ -32,9 +34,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(FaculdadeClientInterface::class, FaculdadeHttpClient::class);
 
-        $this->app->singleton(AIClientInterface::class, OpenAIClient::class);
+        $this->app->singleton(AIClientInterface::class, fn() => new GeminiClient(config('services.gemini.access_token')));
+        // $this->app->singleton(AIClientInterface::class, fn() => new OpenAIClient(config('services.openai.access_token')));
 
-        $this->app->when(Test::class)
+        $this->app->when(ResolverAssessmentService::class)
         ->needs(ExamClientInterface::class)
         ->give(ApolClient::class);
 

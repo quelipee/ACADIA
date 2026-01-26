@@ -18,6 +18,14 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    'gemini' => [
+        'access_token' => env('GEMINI_API_KEY'),
+    ],
+
+    'openai' => [
+        'access_token' => env('OPENAI_API_KEY'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

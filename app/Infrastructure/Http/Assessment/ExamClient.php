@@ -22,7 +22,20 @@ class ExamClient implements ExamClientInterface{
         return $this->hasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, $value->value);
     }
 
-    public function fetchFormattedQuestion(string $id, string $status) {
-        return $this->hasQuestionFormatting($id,$status);
+    public function confirmStartAssessment(string $cIdAvaliacao, int $try) : void {
+        $endpoint = str_replace(
+            '{try}', $try+1,
+            config('faculdade.endpoints.confirm_start_assessment')
+        ); 
+
+        $this->http->client()->get($endpoint,[
+            'ap' => 'false',
+            'cIdAvaliacao' => $cIdAvaliacao,
+            'cache' => random_int(1000000000000, 9999999999999)
+        ]);
+    }
+
+    public function listAllQuestion(string $id) : array {
+        return $this->hasQuestionAllList($id);
     }
 }

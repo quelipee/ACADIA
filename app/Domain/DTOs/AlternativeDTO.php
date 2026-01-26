@@ -12,7 +12,7 @@ readonly class AlternativeDTO {
 
     public static function fromApi(array $data) : AlternativeDTO {
         return new self(
-            id: $data['id'],
+            id: $data['questaoAlternativaAtributos'][0]['id'],
             idQuestaoAlternativa: $data['questaoAlternativaAtributos'][0]['idQuestaoAlternativa'],
             valor: QuestionDTO::formattedText($data['questaoAlternativaAtributos'][0]['valor']),
         );

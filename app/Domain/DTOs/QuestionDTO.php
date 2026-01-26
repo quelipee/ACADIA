@@ -27,7 +27,7 @@ readonly class QuestionDTO {
             id: $request['id'],
             idAvaliacaoUsuario: $request['idAvaliacaoUsuario'],
             idQuestao: $request['idQuestao'],
-            idQuestaoAlternativa: $request['idQuestaoAlternativa'],
+            idQuestaoAlternativa: $request['alternativas'][0]['questaoAlternativaAtributos'][0]['idQuestaoAlternativa'],
             questao: $questao,
             alternativas: self::formattedAlternative($request['alternativas']),
         );
@@ -49,7 +49,6 @@ readonly class QuestionDTO {
     }
 
     public static function formattedAlternative(array $request) {
-        
         return  collect($request)
         ->map(fn($data) => AlternativeDTO::fromApi($data))
         ->all();
