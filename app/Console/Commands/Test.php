@@ -48,6 +48,6 @@ class Test extends Command
         $graduation = $this->graduation->getInfoListGraduation();
         $disciplina  = $this->subject->courseDiscipline($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
         $activities = $this->exam->listStudentActivity($disciplina[0]->id,$disciplina[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA);
-        $this->service->resolver($activities[0]->id, $activities[0]->cID, $activities[0]->tentativa);
+        $this->service->resolver($activities[0]->cID);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Application\Services\ResolveApolAttemptsService;
 use App\Application\Services\ResolverAssessmentService;
 use App\Console\Commands\Test;
 use App\Domain\Contracts\Academic\DisciplinaClientInterface;
@@ -44,6 +45,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->when(Test::class)
         ->needs(ExamClientInterface::class)
         ->give(ExamClient::class);
+
+        $this->app->when(ResolveApolAttemptsService::class)
+        ->needs(ExamClientInterface::class)
+        ->give(ApolClient::class);
 
         $this->app->bind(GraduationClientInterface::class, GraduationClient::class);
 

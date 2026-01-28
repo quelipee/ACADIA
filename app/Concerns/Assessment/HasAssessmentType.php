@@ -26,7 +26,7 @@ trait HasAssessmentType {
         ->where('nomeClassificacaoTipo', $type)
         ->values()
         ->toArray();
-
+        // mexer aqui, pq client nao pode ter logica
         return $list_activities;
     }
 }

@@ -17,7 +17,8 @@
             'list_questions' => 'ava/bqs/AvaliacaoUsuarioHistorico/{id}/Avaliacao?autorizacao=',
             'confirm_start_assessment' => 'ava/bqs/AvaliacaoUsuario/0/tentativa/{try}',
             'send_response' => 'ava/bqs/AvaliacaoUsuarioHistorico',
-            'finish_assessment' => 'ava/bqs/AvaliacaoUsuario/{idAvaliacaoUsuario}/Finalizar/1'
+            'finish_assessment' => 'ava/bqs/AvaliacaoUsuario/{idAvaliacaoUsuario}/Finalizar/1',
+            'get_all_the_notes_from_the_activities' => 'ava/bqs/AvaliacaoUsuario/0'
         ],
 
         'http' => [

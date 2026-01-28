@@ -13,12 +13,13 @@ class ResolverAssessmentService {
         private AIClientInterface $client,
         private readonly FaculdadeClientInterface $http,
         private ExamClientInterface $clientService,
+        private ResolveApolAttemptsService $resolve_apol
     )
     {}
 
-    public function resolver(string $id, string $cIdAvaliacao, int $try) {      
-        $this->clientService->confirmStartAssessment($cIdAvaliacao, $try);
-        $list_question = $this->clientService->listAllQuestion($id);
+    public function resolver(string $cIdAvaliacao) {
+        $data = $this->resolve_apol->resolver($cIdAvaliacao);
+        $list_question = $this->clientService->listAllQuestion($data->id);
 
         foreach ($list_question as $list) {
             $question = $this->clientService->hasQuestionFormatting($list);
@@ -51,7 +52,5 @@ class ResolverAssessmentService {
             config('faculdade.endpoints.finish_assessment')
         );
         $this->http->client()->get($endpoint);
-
-        // $this->http->client()->get("https://univirtus.uninter.com/ava/bqs/AvaliacaoUsuario/{$question->idAvaliacaoUsuario}/Finalizar/1");
     }
 }
