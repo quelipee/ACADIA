@@ -20,4 +20,15 @@ trait HasQuestionFormatting {
         return $response['avaliacaoUsuarioHistoricos'];
     }
 
+        protected function hasQuestionAllListProof(string $idAvaliacaoUsuario, string $token) : array {
+        $endpoint = str_replace(
+            '{idAvaliacaoUsuario}', $idAvaliacaoUsuario,
+            '{token}', $token,
+            config('faculdade.endpoints.list_questionsProof')
+        );
+        
+        $response = $this->http->client()->get($endpoint);
+        return $response['avaliacaoUsuarioHistoricos'];
+    }
+
 }

@@ -13,27 +13,28 @@ class ExamClient implements ExamClientInterface{
     use HasAssessmentType, HasQuestionFormatting;
     
     public function name() : string {
-        return ExamActivityType::MISTA->value;
+        return ExamActivityType::EXAM->value;
     }
 
-    public function listStudentActivity(int $idSalaVirtual, int $idSalaVirtualOferta, ExamActivityType $value) : array {
-        if(!isset($value) || $value->value !== $this->name()) {
-            throw new InvalidArgumentException('Tipo invalido!!');
-        }
-        return $this->hasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, $value->value);
+    public function listStudentActivity(int $idSalaVirtual, int $idSalaVirtualOferta) : array {
+        return $this->hasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, $this->name());
     }
 
-    public function confirmStartAssessment(string $cIdAvaliacao, int $try) : void {
+    public function confirmStartAssessment(string $cIdAvaliacao, int $try) {
         $endpoint = str_replace(
-            '{try}', $try+1,
+            '{try}', $try + 1,
             config('faculdade.endpoints.confirm_start_assessment')
         ); 
 
-        $this->http->client()->get($endpoint,[
+        $response = $this->http->client()->get($endpoint,[
             'ap' => 'false',
             'cIdAvaliacao' => $cIdAvaliacao,
             'cache' => random_int(1000000000000, 9999999999999)
         ]);
+
+        return isset($response['avaliacaoUsuario']) ? 
+        ApolAttemptDTO::fromApi($response['avaliacaoUsuario']) :
+        throw new InvalidArgumentException($response['mensagens'][0]);
     }
 
     public function getAllTheNotesFromTheActivities(string $cIdAvaliacao) : array {
@@ -46,7 +47,7 @@ class ExamClient implements ExamClientInterface{
         ->all();
     }
 
-    public function listAllQuestion(string $id) : array {
-        return $this->hasQuestionAllList($id);
+    public function listAllQuestion(string $id, ?string $token) : array {
+        return $this->hasQuestionAllListProof($id, $token);
     }
 }

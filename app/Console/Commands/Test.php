@@ -7,7 +7,6 @@ use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
 use App\Domain\Contracts\AIClientInterface;
-use App\Domain\Contracts\Assessment\ExamClientInterface;
 use App\Domain\Enums\ExamActivityType;
 use Illuminate\Console\Command;
 
@@ -31,7 +30,6 @@ class Test extends Command
         protected FaculdadeClientInterface $faculdade,
         protected GraduationClientInterface $graduation,
         protected DisciplinaClientInterface $subject,
-        protected ExamClientInterface $exam,
         protected AIClientInterface $client,
         protected ResolverAssessmentService $service,
     )
@@ -46,8 +44,7 @@ class Test extends Command
     {
         $this->faculdade->signInAuthenticated();
         $graduation = $this->graduation->getInfoListGraduation();
-        $disciplina  = $this->subject->courseDiscipline($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
-        $activities = $this->exam->listStudentActivity($disciplina[0]->id,$disciplina[0]->idSalaVirtualOfertaAtual, ExamActivityType::MISTA);
-        $this->service->resolver($activities[0]->cID);
+        $disciplina  = $this->subject->courseDiscipline($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
+        $this->service->resolver($disciplina, ExamActivityType::EXAM);
     }
 }

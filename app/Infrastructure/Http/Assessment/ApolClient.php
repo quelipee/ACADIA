@@ -13,17 +13,14 @@ class ApolClient implements ExamClientInterface{
     use HasAssessmentType,HasQuestionFormatting;
     
     public function name() : string {
-        return ExamActivityType::APOL->value;
+        return ExamActivityType::MISTA->value;
     }
 
-    public function listStudentActivity(int $idSalaVirtual, int $idSalaVirtualOferta, ExamActivityType $value) : array {
-        if(!isset($value) || $value->value !== $this->name()) {
-            throw new InvalidArgumentException('Tipo invalido!!');
-        }
-        return $this->hasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, $value->value);
+    public function listStudentActivity(int $idSalaVirtual, int $idSalaVirtualOferta) : array {
+        return $this->hasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, $this->name());
     }
 
-    public function confirmStartAssessment(string $cIdAvaliacao, int $try) : ApolAttemptDTO {
+    public function confirmStartAssessment(string $cIdAvaliacao, int $try) {
         $endpoint = str_replace(
             '{try}', $try,
             config('faculdade.endpoints.confirm_start_assessment')
@@ -35,7 +32,9 @@ class ApolClient implements ExamClientInterface{
             'cache' => random_int(1000000000000, 9999999999999)
         ]);
         
-        return ApolAttemptDTO::fromApi($response['avaliacaoUsuario']); //TENHO QUE VOLTAR AQUI DEPOIS, PQ AQUI PEGA O ID QUE NAO PEGA QUANDO A ATIVIDADE NUNCA FOI FEITA
+        return isset($response['avaliacaoUsuario']) ? 
+        ApolAttemptDTO::fromApi($response['avaliacaoUsuario']) :
+        throw new InvalidArgumentException($response['mensagens'][0]);
     }
 
     public function getAllTheNotesFromTheActivities(string $cIdAvaliacao) : array {
@@ -48,7 +47,7 @@ class ApolClient implements ExamClientInterface{
         ->all();
     }
 
-    public function listAllQuestion(string $id) {
+    public function listAllQuestion(string $id, ?string $token) {
         return $this->hasQuestionAllList($id);
     }
 }

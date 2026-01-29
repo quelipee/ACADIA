@@ -15,10 +15,12 @@
             'list_subjects' => 'ava/ava/SalaVirtual/{idCourse}/CursoUsuarioPermissao/true',
             'list_activities' => 'ava/bqs/AvaliacaoUsuario/1/paginacao/true',
             'list_questions' => 'ava/bqs/AvaliacaoUsuarioHistorico/{id}/Avaliacao?autorizacao=',
+            'list_questionsProof' => 'ava/bqs/AvaliacaoUsuarioHistorico/{idAvaliacaoUsuario}/Token/{token}',
             'confirm_start_assessment' => 'ava/bqs/AvaliacaoUsuario/0/tentativa/{try}',
             'send_response' => 'ava/bqs/AvaliacaoUsuarioHistorico',
             'finish_assessment' => 'ava/bqs/AvaliacaoUsuario/{idAvaliacaoUsuario}/Finalizar/1',
-            'get_all_the_notes_from_the_activities' => 'ava/bqs/AvaliacaoUsuario/0'
+            'get_all_the_notes_from_the_activities' => 'ava/bqs/AvaliacaoUsuario/0',
+            'confirm_user_photo' => 'ava/bqs/AvaliacaoUsuarioReconhecimento'
         ],
 
         'http' => [
