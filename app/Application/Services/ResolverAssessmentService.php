@@ -21,9 +21,8 @@ class ResolverAssessmentService {
 
     public function resolver(array $disciplina ,ExamActivityType $type) : void {
         $clientService = $this->factory->make($type);
-        
         $activities = $clientService->listStudentActivity($disciplina[30]->id,$disciplina[30]->idSalaVirtualOfertaAproveitamento);
-
+        dd($activities);
         if ($type == ExamActivityType::EXAM) {
             //ajustar depois
             $this->avaliacaoUsuarioToken = $clientService->photoConfirmation($activities[2]->id);
