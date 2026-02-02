@@ -1,5 +1,5 @@
 <?php
-namespace App\Domain\DTOs;
+namespace App\Domain\DTOs\Academic;
 
 use InvalidArgumentException;
 

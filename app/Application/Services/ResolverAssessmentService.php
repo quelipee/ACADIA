@@ -5,7 +5,7 @@ namespace App\Application\Services;
 use App\Domain\Contracts\AIClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Enums\ExamActivityType;
-use App\Infrastructure\Http\Assessment\ExamClientFactory;
+use App\Infrastructure\Http\Assessment\Factories\ExamClientFactory;
 use InvalidArgumentException;
 
 class ResolverAssessmentService {

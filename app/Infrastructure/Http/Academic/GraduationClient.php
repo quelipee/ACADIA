@@ -4,7 +4,7 @@ namespace App\Infrastructure\Http\Academic;
 
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
-use App\Domain\DTOs\GraduationDTO;
+use App\Domain\DTOs\Academic\GraduationDTO;
 use InvalidArgumentException;
 
 class GraduationClient implements GraduationClientInterface{

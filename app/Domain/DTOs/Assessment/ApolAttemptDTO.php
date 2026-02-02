@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\DTOs;
+namespace App\Domain\DTOs\Assessment;
 
 readonly class ApolAttemptDTO {
     public function __construct(

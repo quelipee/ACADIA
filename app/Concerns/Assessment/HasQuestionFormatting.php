@@ -2,7 +2,7 @@
 
 namespace App\Concerns\Assessment;
 
-use App\Domain\DTOs\QuestionDTO;
+use App\Domain\DTOs\Assessment\QuestionDTO;
 
 trait HasQuestionFormatting {
 

@@ -4,7 +4,7 @@ namespace App\Application\Services;
 
 use App\Domain\Enums\ActivityStatus;
 use App\Domain\Enums\ExamActivityType;
-use App\Infrastructure\Http\Assessment\ExamClientFactory;
+use App\Infrastructure\Http\Assessment\Factories\ExamClientFactory;
 
 class ResolveApolAttemptsService {
     public function __construct(

@@ -3,7 +3,7 @@
 namespace App\Concerns\Assessment;
 
 use App\Domain\Contracts\FaculdadeClientInterface;
-use App\Domain\DTOs\ApolAttemptDTO;
+use App\Domain\DTOs\Assessment\ApolAttemptDTO;
 use InvalidArgumentException;
 
 trait HasAssessmentType {

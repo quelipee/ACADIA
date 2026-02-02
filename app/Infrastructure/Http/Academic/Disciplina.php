@@ -5,7 +5,7 @@ namespace App\Infrastructure\Http\Academic;
 use App\Concerns\Assessment\HasAssessmentType;
 use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
-use App\Domain\DTOs\DisciplinaDTO;
+use App\Domain\DTOs\Academic\DisciplinaDTO;
 
 class Disciplina implements DisciplinaClientInterface{
     use HasAssessmentType;

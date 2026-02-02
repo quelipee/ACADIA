@@ -1,9 +1,9 @@
 <?php
-namespace App\Domain\DTOs;
+namespace App\Domain\DTOs\Assessment;
 
 use InvalidArgumentException;
 
-readonly class ActivitiesDTO {
+readonly class ActivityDTO {
     public function __construct(
         public int $id,
         public int $idAvaliacao,
@@ -23,7 +23,7 @@ readonly class ActivitiesDTO {
     )
     {}
 
-    public static function fromApi(array $request) : ActivitiesDTO {
+    public static function fromApi(array $request) : ActivityDTO {
         if(!$request['idAvaliacao']) {
             throw new InvalidArgumentException('Atividade não encontrada!!');
         }

@@ -2,7 +2,7 @@
 
 namespace App\Domain\Contracts\Assessment;
 
-use App\Domain\DTOs\ApolAttemptDTO;
+use App\Domain\DTOs\Assessment\ApolAttemptDTO;
 use App\Domain\Enums\ExamActivityType;
 
 interface ExamClientInterface {

@@ -2,8 +2,7 @@
 
 namespace App\Concerns;
 
-use App\Domain\DTOs\QuestionDTO;
-use Symfony\Component\Mime\Part\TextPart;
+use App\Domain\DTOs\Assessment\QuestionDTO;
 
 trait HasPromptBuilding {
     protected function buildPrompt(QuestionDTO $question) : string {

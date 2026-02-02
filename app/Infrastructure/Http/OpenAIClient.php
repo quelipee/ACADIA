@@ -4,8 +4,8 @@ namespace App\Infrastructure\Http;
 
 use App\Concerns\HasPromptBuilding;
 use App\Domain\Contracts\AIClientInterface;
-use App\Domain\DTOs\AIAnswerDTO;
-use App\Domain\DTOs\QuestionDTO;
+use App\Domain\DTOs\AI\AIAnswerDTO;
+use App\Domain\DTOs\Assessment\QuestionDTO;
 use OpenAI;
 
 class OpenAIClient implements AIClientInterface {

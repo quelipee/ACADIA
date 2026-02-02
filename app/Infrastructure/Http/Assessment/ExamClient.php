@@ -5,7 +5,7 @@ namespace App\Infrastructure\Http\Assessment;
 use App\Concerns\Assessment\HasAssessmentType;
 use App\Concerns\Assessment\HasQuestionFormatting;
 use App\Domain\Contracts\Assessment\ExamClientInterface;
-use App\Domain\DTOs\ActivitiesDTO;
+use App\Domain\DTOs\Assessment\ActivityDTO;
 use App\Domain\Enums\ExamActivityType;
 
 class ExamClient implements ExamClientInterface{
@@ -20,7 +20,7 @@ class ExamClient implements ExamClientInterface{
         $list_activities = [];
 
         foreach ($response['avaliacaoUsuarios'] as $data) {
-                $list_activities[] = ActivitiesDTO::fromApi($data);
+                $list_activities[] = ActivityDTO::fromApi($data);
         }
 
         $list_activities = collect($list_activities)

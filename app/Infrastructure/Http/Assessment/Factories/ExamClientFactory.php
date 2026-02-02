@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Infrastructure\Http\Assessment;
+namespace App\Infrastructure\Http\Assessment\Factories;
 
 use App\Domain\Contracts\Assessment\ExamClientInterface;
 use App\Domain\Enums\ExamActivityType;
+use App\Infrastructure\Http\Assessment\ApolClient;
+use App\Infrastructure\Http\Assessment\ExamClient;
+use App\Infrastructure\Http\Assessment\MistaClient;
 use InvalidArgumentException;
 
 class ExamClientFactory {
