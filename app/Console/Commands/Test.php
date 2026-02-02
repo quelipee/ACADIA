@@ -44,7 +44,7 @@ class Test extends Command
     {
         $this->faculdade->signInAuthenticated();
         $graduation = $this->graduation->getInfoListGraduation();
-        $disciplina  = $this->subject->courseDiscipline($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
-        $this->service->resolver($disciplina, ExamActivityType::EXAM);
+        $disciplina  = $this->subject->courseDiscipline($graduation[2]->idUsuarioCurso,$graduation[2]->idCurso);
+        $this->service->resolver($disciplina, ExamActivityType::MISTA);
     }
 }

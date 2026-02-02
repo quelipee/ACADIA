@@ -2,7 +2,6 @@
 
 namespace App\Application\Services;
 
-use App\Domain\Contracts\Assessment\ExamClientInterface;
 use App\Domain\Enums\ActivityStatus;
 use App\Domain\Enums\ExamActivityType;
 use App\Infrastructure\Http\Assessment\ExamClientFactory;
@@ -13,19 +12,20 @@ class ResolveApolAttemptsService {
     )
     {}
 
-    public function resolver(string $cIdAvaliacao, ExamActivityType $type) {
+    public function resolver(string $cIdAvaliacao, string|null $cIdAvaliacaoVinculada, ExamActivityType $type) {
         $client = $this->factory->make($type);
         $list_try = $client->getAllTheNotesFromTheActivities($cIdAvaliacao);
-       
-        foreach($list_try as $key => $list) {
+        $maxTry = 0;
+
+        foreach($list_try as $list) {
             if ($list->status == ActivityStatus::START->value 
             and $list->tentativa <= $list->tentativaTotal) {
                 return $list;
             }
 
-            if($key+1 === count($list_try)){
-                return $client->confirmStartAssessment($cIdAvaliacao, $list->tentativa +1);
-            }
+            $maxTry = max($maxTry,$list->tentativa);
         }
+
+        return $client->confirmStartAssessment($cIdAvaliacao, $cIdAvaliacaoVinculada, $maxTry +1);
     }
 }

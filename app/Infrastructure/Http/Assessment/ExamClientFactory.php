@@ -9,7 +9,8 @@ use InvalidArgumentException;
 class ExamClientFactory {
     public function __construct(
         private ApolClient $apol_client,
-        private ExamClient $exam_client
+        private ExamClient $exam_client,
+        private MistaClient $mista_client
     )
     {}
 
@@ -17,7 +18,7 @@ class ExamClientFactory {
         return match ($type) {
             ExamActivityType::APOL => $this->apol_client,
             ExamActivityType::EXAM => $this->exam_client,
-            ExamActivityType::MISTA => $this->apol_client,
+            ExamActivityType::MISTA => $this->mista_client,
             default => throw new InvalidArgumentException('ERROR NOT FOUND!!')
         };
     }

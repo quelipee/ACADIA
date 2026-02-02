@@ -21,17 +21,16 @@ class ResolverAssessmentService {
 
     public function resolver(array $disciplina ,ExamActivityType $type) : void {
         $clientService = $this->factory->make($type);
-        $activities = $clientService->listStudentActivity($disciplina[30]->id,$disciplina[30]->idSalaVirtualOfertaAproveitamento);
-        dd($activities);
-        if ($type == ExamActivityType::EXAM) {
-            //ajustar depois
-            $this->avaliacaoUsuarioToken = $clientService->photoConfirmation($activities[2]->id);
-        }
-        
-        $data = $this->resolve_apol->resolver($activities[0]->cID, $type);
-        // TODO terminar aqui, pq em exame eu preciso passar o token, mas eu estou usando a mesma interface para os dois (exercicios e exame) e o exame precisa de token
-        $list_question = $clientService->listAllQuestion($data->id, $this->avaliacaoUsuarioToken);
+        // ingles usa o idSalaVirtualOfertaAtual e a graduacao usa idSalaVirtualOfertaAproveitamento
+        $all_activities = $clientService->listStudentActivity($disciplina[2]->id,$disciplina[2]->idSalaVirtualOfertaAproveitamento);
+        $activity = $this->resolve_apol->resolver($all_activities[0]->cID, $all_activities[0]->cIdAvaliacaoVinculada, $type);
 
+        if ($type == ExamActivityType::EXAM) {
+            $this->avaliacaoUsuarioToken = $clientService->photoConfirmation($activity->id);
+        }
+
+        $list_question = $clientService->listAllQuestion($activity->id, $this->avaliacaoUsuarioToken);
+        
         foreach ($list_question as $list) {
             $question = $clientService->hasQuestionFormatting($list);
             $aiAnswer = $this->client->answerQuestion($question);
@@ -49,13 +48,13 @@ class ResolverAssessmentService {
 
                     if(!$response->successful()){
                         dd($response->status());
-                        throw new InvalidArgumentException('erro api!!');
+                        throw new InvalidArgumentException($response->status());
                     }
 
                     print_r($alternativa);
                 }
             }
-            sleep(10);
+            sleep(5);
         }
 
         $endpoint = str_replace(

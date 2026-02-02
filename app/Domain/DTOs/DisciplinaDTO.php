@@ -15,16 +15,19 @@ readonly class DisciplinaDTO {
     {}
 
     public static function fromApi(array $request) : DisciplinaDTO {
-        if (!$request['id']) {
+        if (!isset($request['id'])) {
             throw new InvalidArgumentException('Essa materia não existe!!');
         }
+
+        $idSalaVirtualOfertaAproveitamento = $request['idSalaVirtualOfertaAproveitamento'] 
+        ?? $request['idSalaVirtualOfertaAtual'];
 
         return new self(
             id: $request['id'],
             cId: $request['cId'],
             idCurso: $request['idCurso'],
             idSalaVirtualOfertaAtual: $request['idSalaVirtualOfertaAtual'],
-            idSalaVirtualOfertaAproveitamento: $request['idSalaVirtualOfertaAproveitamento'],
+            idSalaVirtualOfertaAproveitamento: $idSalaVirtualOfertaAproveitamento,
             nome: $request['nome'],
         );
     }

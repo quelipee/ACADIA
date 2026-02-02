@@ -5,49 +5,33 @@ namespace App\Infrastructure\Http\Assessment;
 use App\Concerns\Assessment\HasAssessmentType;
 use App\Concerns\Assessment\HasQuestionFormatting;
 use App\Domain\Contracts\Assessment\ExamClientInterface;
-use App\Domain\DTOs\ApolAttemptDTO;
+use App\Domain\DTOs\ActivitiesDTO;
 use App\Domain\Enums\ExamActivityType;
-use InvalidArgumentException;
 
 class ExamClient implements ExamClientInterface{
     use HasAssessmentType, HasQuestionFormatting;
     
-    public function name() : string {
-        return ExamActivityType::EXAM->value;
+    public function activityType() : ExamActivityType {
+        return ExamActivityType::EXAM;
     }
 
     public function listStudentActivity(int $idSalaVirtual, int $idSalaVirtualOferta) : array {
-        return $this->hasAssessmentType($idSalaVirtual, $idSalaVirtualOferta, $this->name());
+        $response = $this->http->client()->get(config('faculdade.endpoints.list_proof'));
+        $list_activities = [];
+
+        foreach ($response['avaliacaoUsuarios'] as $data) {
+                $list_activities[] = ActivitiesDTO::fromApi($data);
+        }
+
+        $list_activities = collect($list_activities)
+        ->where('nomeClassificacaoTipo', $this->activityType()->value)
+        ->values()
+        ->toArray();
+        
+        return $list_activities;
     }
 
-    public function confirmStartAssessment(string $cIdAvaliacao, int $try) {
-        $endpoint = str_replace(
-            '{try}', $try + 1,
-            config('faculdade.endpoints.confirm_start_assessment')
-        ); 
-
-        $response = $this->http->client()->get($endpoint,[
-            'ap' => 'false',
-            'cIdAvaliacao' => $cIdAvaliacao,
-            'cache' => random_int(1000000000000, 9999999999999)
-        ]);
-
-        return isset($response['avaliacaoUsuario']) ? 
-        ApolAttemptDTO::fromApi($response['avaliacaoUsuario']) :
-        throw new InvalidArgumentException($response['mensagens'][0]);
-    }
-
-    public function getAllTheNotesFromTheActivities(string $cIdAvaliacao) : array {
-        $response = $this->http->client()->get(config('faculdade.endpoints.get_all_the_notes_from_the_activities'),[
-            'cIdAvaliacao' => $cIdAvaliacao,
-        ]);
-
-        return collect($response['avaliacaoUsuarios'])
-        ->map(fn($data) => ApolAttemptDTO::fromApi($data))
-        ->all();
-    }
-
-    public function listAllQuestion(string $id, ?string $token) : array {
+    public function listAllQuestion(string $id, ?array $token) : array {
         return $this->hasQuestionAllListProof($id, $token);
     }
 }

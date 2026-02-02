@@ -10,7 +10,7 @@ readonly class ApolAttemptDTO {
         public int $tentativa,
         public int $tentativaTotal,
         public int|null $nota,
-        public string $status,
+        public string|null $status,
     )
     {}
 

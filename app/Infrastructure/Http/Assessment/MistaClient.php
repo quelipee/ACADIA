@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Infrastructure\Http\Assessment;
 
@@ -8,11 +8,11 @@ use App\Concerns\Assessment\HasQuestionFormatting;
 use App\Domain\Contracts\Assessment\ExamClientInterface;
 use App\Domain\Enums\ExamActivityType;
 
-class ApolClient implements ExamClientInterface{
-    use HasAssessmentType, HasQuestionFormatting, HasActivityList;
+class MistaClient implements ExamClientInterface {
+        use HasAssessmentType, HasQuestionFormatting, HasActivityList;
     
     public function activityType() : ExamActivityType {
-        return ExamActivityType::APOL;
+        return ExamActivityType::MISTA;
     }
 
     public function listAllQuestion(string $id, ?array $token) : array {

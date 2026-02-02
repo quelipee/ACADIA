@@ -15,6 +15,7 @@ use App\Infrastructure\Http\Academic\GraduationClient;
 use App\Infrastructure\Http\Assessment\ApolClient;
 use App\Infrastructure\Http\Assessment\ExamClient;
 use App\Infrastructure\Http\Assessment\ExamClientFactory;
+use App\Infrastructure\Http\Assessment\MistaClient;
 use App\Infrastructure\Http\FaculdadeHttpClient;
 use App\Infrastructure\Http\GeminiClient;
 use App\Infrastructure\Http\OpenAIClient;
@@ -40,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(ExamClient::class);
         $this->app->singleton(ApolClient::class);
+        $this->app->singleton(MistaClient::class);
 
         $this->app->singleton(ExamClientFactory::class);
 

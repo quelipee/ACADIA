@@ -26,8 +26,6 @@ class GeminiClient implements AIClientInterface{
         $prompt = $this->buildPrompt($question); 
         $response = $this->client->generativeModel(ModelName::GEMINI_2_5)
         ->generateContent(new TextPart($prompt));
-        // $response = $this->client->gemini25Flash()
-        // ->startChat()->sendMessage(new TextPart($prompt));
 
         return AIAnswerDTO::fromGeminiResponse($response->text());
     }

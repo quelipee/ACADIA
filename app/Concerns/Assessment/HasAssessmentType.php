@@ -3,7 +3,8 @@
 namespace App\Concerns\Assessment;
 
 use App\Domain\Contracts\FaculdadeClientInterface;
-use App\Domain\DTOs\ActivitiesDTO;
+use App\Domain\DTOs\ApolAttemptDTO;
+use InvalidArgumentException;
 
 trait HasAssessmentType {
 
@@ -12,27 +13,39 @@ trait HasAssessmentType {
     )
     {}
 
-    protected function hasAssessmentType(int $idSalaVirtual, int $idSalaVirtualOferta, string $type) : array {
-        $response = $this->http->client()->get(config('faculdade.endpoints.list_activities'),[
-            'idSalaVirtual' => $idSalaVirtual,
-            'idSalaVirtualOferta' => $idSalaVirtualOferta,
-            // 'idSalaVirtualOfertaAtual' => $idSalaVirtualOferta, // isso é a de ingles
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function confirmStartAssessment(string $cIdAvaliacao, string|null $cIdAvaliacaoVinculada, int $try) : ApolAttemptDTO {
+        $endpoint = str_replace(
+            '{try}', $try,
+            config('faculdade.endpoints.confirm_start_assessment')
+        ); 
+
+        $response = $this->http->client()->get($endpoint,[
+            'ap' => 'false',
+            'cIdAvaliacao' => $cIdAvaliacao,
+            'idAvaliacaoVinculada' => $cIdAvaliacaoVinculada,
+            'cache' => random_int(1000000000000, 9999999999999)
         ]);
 
-        foreach ($response['avaliacaoUsuarios'] as $data) {
-            $list_activities[] = ActivitiesDTO::fromApi($data);
-        }
-        
-        $list_activities = collect($list_activities)
-        ->where('nomeClassificacaoTipo', $type)
-        ->values()
-        ->toArray();
-        
-        return $list_activities;
+        return isset($response['avaliacaoUsuario']) ? 
+        ApolAttemptDTO::fromApi($response['avaliacaoUsuario']) :
+        throw new InvalidArgumentException($response['mensagens'][0]);
+    }
+
+    public function getAllTheNotesFromTheActivities(string $cIdAvaliacao) : array {
+        $response = $this->http->client()->get(config('faculdade.endpoints.get_all_the_notes_from_the_activities'),[
+            'cIdAvaliacao' => $cIdAvaliacao,
+        ]);
+
+        return collect($response['avaliacaoUsuarios'])
+        ->map(fn($data) => ApolAttemptDTO::fromApi($data))
+        ->all();
     }
 
     public function photoConfirmation (int $id) {
-        $response = $this->http->client()->get(config('faculdade.endpoints.confirm_user_photo'),[
+        $response = $this->http->client()->post(config('faculdade.endpoints.confirm_user_photo'),[
             'id' => $id,
             'rkg' => fake()->imageUrl(),
         ]);
