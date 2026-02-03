@@ -6,6 +6,7 @@ use App\Concerns\HasPromptBuilding;
 use App\Domain\Contracts\AIClientInterface;
 use App\Domain\DTOs\AI\AIAnswerDTO;
 use App\Domain\DTOs\Assessment\QuestionDTO;
+use App\Domain\Enums\AiProvider;
 use OpenAI;
 
 class OpenAIClient implements AIClientInterface {
@@ -20,6 +21,10 @@ class OpenAIClient implements AIClientInterface {
         $this->client = OpenAI::client($accessToken);
     }
 
+    public function type() : string {
+        return AiProvider::OPENAI->value . PHP_EOL;
+    }
+
     public function answerQuestion(QuestionDTO $question) : AIAnswerDTO {
         $prompt = $this->buildPrompt($question); 
         $response = $this->client->responses()->create([
@@ -27,6 +32,6 @@ class OpenAIClient implements AIClientInterface {
             'input' => $prompt,
         ]);
 
-        return AIAnswerDTO::fromGeminiResponse($response->outputText);
+        return AIAnswerDTO::fromResponse($response->outputText);
     }
 }

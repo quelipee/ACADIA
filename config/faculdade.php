@@ -3,6 +3,7 @@
         'base_urls' => [
             'login' => env('FACUL_BASE_LOGIN_URL'),
             'api' => env('FACUL_BASE_URL'),
+            'openrouter_base_url' => env('OPENROUTER_BASE_URL')
         ],
 
         'credentials' => [

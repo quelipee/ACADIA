@@ -26,6 +26,10 @@ return [
         'access_token' => env('OPENAI_API_KEY'),
     ],
 
+    'llama' => [
+        'access_token' => env('OPEN_ROUTER_API_KEY'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

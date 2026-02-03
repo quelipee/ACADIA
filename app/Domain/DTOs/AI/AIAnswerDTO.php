@@ -11,7 +11,7 @@ readonly class AIAnswerDTO {
     )
     {}
 
-    public static function fromGeminiResponse(string $text) : AIAnswerDTO {
+    public static function fromResponse(string $text) : AIAnswerDTO {
         if(!isset($text)){
             throw new InvalidArgumentException('ERRO ID INVALID');
         }

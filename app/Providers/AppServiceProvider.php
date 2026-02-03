@@ -9,9 +9,11 @@ use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
 use App\Infrastructure\Http\Academic\Disciplina;
 use App\Infrastructure\Http\Academic\GraduationClient;
+use App\Infrastructure\Http\Assessment\Factories\AiProviderFactory;
 use App\Infrastructure\Http\Assessment\Factories\ExamClientFactory;
 use App\Infrastructure\Http\FaculdadeHttpClient;
 use App\Infrastructure\Http\GeminiClient;
+use App\Infrastructure\Http\LlamaClient;
 use App\Infrastructure\Http\Session\FaculdadeSession;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -30,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(FaculdadeClientInterface::class, FaculdadeHttpClient::class);
 
-        $this->app->singleton(AIClientInterface::class, fn() => new GeminiClient(config('services.gemini.access_token')));
+        $this->app->singleton(AiProviderFactory::class);
 
         $this->app->singleton(ExamClientFactory::class);
 
