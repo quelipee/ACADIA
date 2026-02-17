@@ -9,6 +9,7 @@ use App\Domain\Contracts\Academic\GraduationClientInterface;
 use App\Domain\Enums\AiProvider;
 use App\Domain\Enums\ExamActivityType;
 use Illuminate\Console\Command;
+use Illuminate\Http\Request;
 
 class Test extends Command
 {
@@ -41,7 +42,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $this->faculdade->signInAuthenticated();
+        $data = new Request(['ru' => 496212, 'password' => 493614]);
+        $this->faculdade->signInAuthenticated($data);
         $graduation = $this->graduation->getInfoListGraduation();
         $disciplina  = $this->subject->courseDiscipline($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
         $this->service->resolver($disciplina, ExamActivityType::APOL, AiProvider::GEMINI);
