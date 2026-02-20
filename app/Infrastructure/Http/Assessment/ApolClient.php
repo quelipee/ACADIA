@@ -10,7 +10,7 @@ use App\Domain\Enums\ExamActivityType;
 
 class ApolClient implements ExamClientInterface{
     use HasAssessmentType, HasQuestionFormatting, HasActivityList;
-    
+
     public function activityType() : ExamActivityType {
         return ExamActivityType::APOL;
     }

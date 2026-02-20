@@ -1,0 +1,544 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { router } from '@inertiajs/vue3'
+
+const props = defineProps({
+  subjects: {
+    type: Array,
+    default: () => []
+  },
+  graduation: {
+    type: Object,
+    default: () => ({
+      nome: '',
+      nomeCursoNivel: ''
+    })
+  }
+})
+
+const menuOpen = ref(false)
+const selectedSubject = ref(null)
+const searchQuery = ref('')
+const filterOpen = ref(false)
+const selectedActivityType = ref('Objetiva') // APOL, PROVAS, MISTA
+
+// Iniciais do nome do usuário
+const userInitial = computed(() => {
+  return 'U'
+})
+
+// Filtrar matérias por busca
+const filteredSubjects = computed(() => {
+  if (!searchQuery.value) return props.subjects
+
+  return props.subjects.filter(subject =>
+    subject.nome.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+// Lógica para modal/detalhes
+const openSubjectDetails = (subject) => {
+  selectedSubject.value = subject
+  selectedActivityType.value = 'Objetiva' // Reset ao abrir
+}
+
+const closeSubjectDetails = () => {
+  selectedSubject.value = null
+}
+
+const open_activies = (data, type) => {
+    router.get(`/activities/${data.id}/${data.idSalaVirtualOfertaAproveitamento}/${type}`)
+}
+
+// Logout
+const handleLogout = () => {
+  console.log('🔓 Logout realizado')
+  router.post(route('logout'))
+  menuOpen.value = false
+}
+
+// Fechar menu
+const closeMenu = () => {
+  menuOpen.value = false
+}
+
+// Copiar para clipboard
+const copyToClipboard = (text, label) => {
+  navigator.clipboard.writeText(text)
+  console.log(`✅ ${label} copiado!`)
+}
+</script>
+
+<template>
+  <div class="relative min-h-screen bg-[#0a0c10] font-sans overflow-x-hidden">
+
+    <!-- Orbs decorativas -->
+    <div class="fixed w-[500px] h-[500px] bg-[radial-gradient(circle,#1a4a42,transparent)]
+                rounded-full blur-[80px] opacity-25 -top-[200px] -left-[200px] pointer-events-none"></div>
+
+    <div class="fixed w-[400px] h-[400px] bg-[radial-gradient(circle,#0d2d4a,transparent)]
+                rounded-full blur-[80px] opacity-25 -bottom-[150px] -right-[150px] pointer-events-none"></div>
+
+    <div class="fixed w-[300px] h-[300px] bg-[radial-gradient(circle,#2a1a4a,transparent)]
+                rounded-full blur-[80px] opacity-25 top-1/2 right-[10%] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto p-6">
+
+      <!-- HEADER -->
+      <header class="mb-10">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+
+          <div class="flex items-center gap-4">
+            <div class="flex items-center justify-center w-14 h-14
+                        bg-[#63cab71f] border border-[#63cab740]
+                        rounded-2xl">
+              <span class="text-2xl text-[#63cab7]">⬡</span>
+            </div>
+
+            <div>
+              <h1 class="text-2xl font-extrabold text-[#e8eaf0]">Matérias</h1>
+              <p class="text-sm text-gray-500">
+                {{ graduation.nomeCursoNivel || 'Suas disciplinas acadêmicas' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- USER MENU COM LOGOUT -->
+          <div class="flex items-center gap-3 relative">
+            <div class="flex items-center justify-center w-11 h-11
+                        bg-gradient-to-br from-[#63cab7] to-[#4ab3a0]
+                        text-[#0a1a17] rounded-xl font-bold text-sm">
+              {{ userInitial }}
+            </div>
+
+            <button
+              @click="menuOpen = !menuOpen"
+              class="flex p-2 rounded-lg bg-white/5 border border-white/10
+                     text-gray-400 hover:bg-white/10 hover:text-[#63cab7]
+                     transition-all duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="19" cy="12" r="1"/>
+                <circle cx="5" cy="12" r="1"/>
+              </svg>
+            </button>
+
+            <!-- DROPDOWN MENU -->
+            <transition
+              enter-active-class="transition ease-out duration-200"
+              enter-from-class="opacity-0 transform translate-y-[-8px]"
+              enter-to-class="opacity-100 transform translate-y-0"
+              leave-active-class="transition ease-in duration-150"
+              leave-from-class="opacity-100 transform translate-y-0"
+              leave-to-class="opacity-0 transform translate-y-[-8px]">
+
+              <div v-show="menuOpen"
+                   @click.self="closeMenu"
+                   class="absolute top-full right-0 mt-2 w-48
+                          bg-[#16191e] border border-white/10 rounded-xl
+                          shadow-[0_16px_32px_rgba(0,0,0,0.3)]
+                          overflow-hidden z-20">
+
+                <a href="/"
+                   @click.prevent="$router.visit(route('dashboard'))"
+                   class="flex items-center gap-3 px-4 py-3
+                          text-gray-400 hover:bg-white/5 hover:text-[#63cab7]
+                          transition-colors duration-200
+                          border-b border-white/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                  </svg>
+                  <span class="text-sm font-medium">Dashboard</span>
+                </a>
+
+                <a href="/"
+                   @click.prevent="$router.visit(route('profile'))"
+                   class="flex items-center gap-3 px-4 py-3
+                          text-gray-400 hover:bg-white/5 hover:text-[#63cab7]
+                          transition-colors duration-200
+                          border-b border-white/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <span class="text-sm font-medium">Perfil</span>
+                </a>
+
+                <div class="h-px bg-white/10"></div>
+
+                <button
+                  @click="handleLogout"
+                  class="w-full flex items-center gap-3 px-4 py-3
+                         text-red-400 hover:bg-red-500/10
+                         transition-colors duration-200
+                         font-medium text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  <span>Sair</span>
+                </button>
+
+              </div>
+            </transition>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- CONTROLES: BUSCA E FILTROS -->
+      <section class="mb-8 flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+        <!-- Search -->
+        <div class="flex-1 relative">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar matérias..."
+            class="w-full px-4 py-3 pl-10 rounded-lg
+                   bg-white/5 border border-white/10
+                   text-[#e8eaf0] placeholder-gray-500
+                   focus:border-[#63cab7] focus:outline-none focus:bg-white/10
+                   transition-all duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+
+        <!-- Total de matérias -->
+        <div class="px-4 py-3 rounded-lg bg-[#63cab71f] border border-[#63cab740]">
+          <p class="text-sm font-semibold text-[#63cab7]">
+            {{ filteredSubjects.length }} {{ filteredSubjects.length === 1 ? 'matéria' : 'matérias' }}
+          </p>
+        </div>
+      </section>
+
+      <!-- LISTA VAZIA -->
+      <div v-if="subjects.length === 0" class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             class="mx-auto text-gray-500 mb-4 opacity-50">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <p class="text-gray-400 text-lg">Nenhuma matéria encontrada</p>
+      </div>
+
+      <!-- GRID DE MATÉRIAS -->
+      <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div v-for="subject in filteredSubjects" :key="subject.id"
+             @click="openSubjectDetails(subject)"
+             class="bg-[#111318] border border-white/10 rounded-2xl p-6
+                    shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_16px_48px_rgba(0,0,0,0.3)]
+                    hover:border-[#63cab780]
+                    hover:shadow-[0_0_0_1px_rgba(99,202,183,0.2),0_24px_64px_rgba(99,202,183,0.08)]
+                    transition-all duration-300 cursor-pointer
+                    hover:-translate-y-1">
+
+          <!-- Badge -->
+          <div class="mb-4">
+            <span class="inline-block bg-[#63cab71f] text-[#63cab7] px-3 py-1
+                         rounded-md text-xs font-semibold">
+              Disciplina
+            </span>
+          </div>
+
+          <!-- Nome da matéria -->
+          <h3 class="text-base font-bold text-[#e8eaf0] mb-4 line-clamp-3 min-h-[3.5rem]">
+            {{ subject.nome }}
+          </h3>
+
+          <!-- IDs em grid compacto -->
+          <div class="space-y-2 mb-4 pb-4 border-b border-white/10">
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500 uppercase font-semibold">ID</span>
+              <span class="text-sm font-mono text-[#63cab7] font-bold">{{ subject.id }}</span>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500 uppercase font-semibold">ID Curso</span>
+              <span class="text-sm font-mono text-[#e8eaf0]">{{ subject.idCurso }}</span>
+            </div>
+
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-500 uppercase font-semibold">Sala Virtual</span>
+              <span class="text-sm font-mono text-[#e8eaf0]">{{ subject.idSalaVirtualOfertaAtual }}</span>
+            </div>
+          </div>
+
+          <!-- CID (código) -->
+          <div class="text-xs">
+            <p class="text-gray-500 uppercase font-semibold mb-1">Código</p>
+            <p class="text-[#63cab7] font-mono break-all text-xs">
+              {{ subject.cId }}
+            </p>
+          </div>
+
+          <!-- Arrow indicator -->
+          <div class="mt-4 flex justify-end">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 class="text-[#63cab7]">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODAL DE DETALHES -->
+    <transition name="modal">
+      <div v-if="selectedSubject"
+           @click="closeSubjectDetails"
+           class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50
+                  flex items-center justify-center p-6">
+
+        <div @click.stop
+             class="bg-[#111318] border border-white/10 rounded-2xl
+                    shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_25px_50px_rgba(0,0,0,0.5)]
+                    w-full max-w-lg">
+
+          <!-- Header do modal -->
+          <div class="flex items-center justify-between p-6 border-b border-white/10">
+            <h2 class="text-2xl font-bold text-[#e8eaf0]">Detalhes da Matéria</h2>
+            <button
+              @click="closeSubjectDetails"
+              class="p-2 text-gray-400 hover:text-[#63cab7] hover:bg-white/10
+                     rounded-lg transition-colors duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Conteúdo do modal -->
+          <div class="p-6 space-y-6">
+
+            <!-- Nome -->
+            <div>
+              <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">
+                Nome da Matéria
+              </label>
+              <div class="bg-white/5 border border-white/10 rounded-lg p-4">
+                <p class="text-[#e8eaf0] text-base">
+                  {{ selectedSubject.nome }}
+                </p>
+              </div>
+            </div>
+
+            <!-- IDs -->
+            <div class="grid grid-cols-2 gap-4">
+              <!-- ID -->
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">
+                  ID
+                </label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
+                  <p class="text-[#e8eaf0] font-mono font-bold">
+                    {{ selectedSubject.id }}
+                  </p>
+                  <button
+                    @click="copyToClipboard(selectedSubject.id, 'ID')"
+                    class="opacity-0 group-hover:opacity-100 text-[#63cab7] hover:text-[#e8eaf0]
+                           transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ID Curso -->
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">
+                  ID Curso
+                </label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
+                  <p class="text-[#e8eaf0] font-mono font-bold">
+                    {{ selectedSubject.idCurso }}
+                  </p>
+                  <button
+                    @click="copyToClipboard(selectedSubject.idCurso, 'ID Curso')"
+                    class="opacity-0 group-hover:opacity-100 text-[#63cab7] hover:text-[#e8eaf0]
+                           transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sala Virtual -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">
+                  Sala Virtual Atual
+                </label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
+                  <p class="text-[#e8eaf0] font-mono text-sm font-bold">
+                    {{ selectedSubject.idSalaVirtualOfertaAtual }}
+                  </p>
+                  <button
+                    @click="copyToClipboard(selectedSubject.idSalaVirtualOfertaAtual, 'Sala Virtual Atual')"
+                    class="opacity-0 group-hover:opacity-100 text-[#63cab7] hover:text-[#e8eaf0]
+                           transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">
+                  Sala Virtual Aproveitamento
+                </label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
+                  <p class="text-[#e8eaf0] font-mono text-sm font-bold">
+                    {{ selectedSubject.idSalaVirtualOfertaAproveitamento }}
+                  </p>
+                  <button
+                    @click="copyToClipboard(selectedSubject.idSalaVirtualOfertaAproveitamento, 'Sala Virtual Aproveitamento')"
+                    class="opacity-0 group-hover:opacity-100 text-[#63cab7] hover:text-[#e8eaf0]
+                           transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Código -->
+            <div>
+              <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">
+                Código da Matéria
+              </label>
+              <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
+                <p class="text-[#63cab7] font-mono text-sm break-all">
+                  {{ selectedSubject.cId }}
+                </p>
+                <button
+                  @click="copyToClipboard(selectedSubject.cId, 'Código')"
+                  class="opacity-0 group-hover:opacity-100 text-[#63cab7] hover:text-[#e8eaf0]
+                         transition-all duration-200 flex-shrink-0 ml-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- NOVO: Seleção de Tipo de Atividade -->
+            <div>
+              <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-3">
+                Tipo de Atividade
+              </label>
+              <div class="grid grid-cols-3 gap-3">
+                <!-- APOL -->
+                <button
+                  @click="selectedActivityType = 'Objetiva'"
+                  :class="`px-4 py-3 rounded-lg border-2 font-bold transition-all duration-200 ${
+                    selectedActivityType === 'APOL'
+                      ? 'bg-[#63cab7] border-[#63cab7] text-[#0a1a17]'
+                      : 'bg-white/5 border-white/10 text-[#e8eaf0] hover:border-[#63cab7] hover:bg-white/10'
+                  }`">
+                  APOL
+                </button>
+
+                <!-- PROVAS -->
+                <button
+                  @click="selectedActivityType = 'Discursiva'"
+                  :class="`px-4 py-3 rounded-lg border-2 font-bold transition-all duration-200 ${
+                    selectedActivityType === 'PROVAS'
+                      ? 'bg-[#63cab7] border-[#63cab7] text-[#0a1a17]'
+                      : 'bg-white/5 border-white/10 text-[#e8eaf0] hover:border-[#63cab7] hover:bg-white/10'
+                  }`">
+                  PROVAS
+                </button>
+
+                <!-- MISTA -->
+                <button
+                  @click="selectedActivityType = 'Mista'"
+                  :class="`px-4 py-3 rounded-lg border-2 font-bold transition-all duration-200 ${
+                    selectedActivityType === 'MISTA'
+                      ? 'bg-[#63cab7] border-[#63cab7] text-[#0a1a17]'
+                      : 'bg-white/5 border-white/10 text-[#e8eaf0] hover:border-[#63cab7] hover:bg-white/10'
+                  }`">
+                  MISTA
+                </button>
+              </div>
+
+              <!-- Feedback do tipo selecionado -->
+              <div class="mt-3 px-4 py-2 bg-[#63cab71f] border border-[#63cab740] rounded-lg">
+                <p class="text-xs text-[#63cab7] font-semibold">
+                  Selecionado: <span class="font-bold">{{ selectedActivityType }}</span>
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="flex gap-4 p-6 border-t border-white/10">
+            <button
+              @click="closeSubjectDetails"
+              class="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10
+                     text-[#e8eaf0] hover:bg-white/10
+                     transition-colors duration-200 font-medium">
+              Fechar
+            </button>
+            <button
+            @click="open_activies(selectedSubject, selectedActivityType)"
+              class="flex-1 px-4 py-2 rounded-lg bg-[#63cab7] text-[#0a1a17]
+                     hover:bg-[#5ab5a8]
+                     transition-colors duration-200 font-bold">
+              Acessar Sala
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </transition>
+
+  </div>
+</template>
+
+<style scoped>
+/* Animações do modal */
+.modal-enter-active, .modal-leave-active {
+  transition: all 0.3s ease;
+}
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+}
+.modal-enter-active > div, .modal-leave-active > div {
+  transition: all 0.3s ease;
+}
+.modal-enter-from > div, .modal-leave-to > div {
+  transform: scale(0.95);
+  opacity: 0;
+}
+</style>

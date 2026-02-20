@@ -20,7 +20,7 @@ trait HasAssessmentType {
         $endpoint = str_replace(
             '{try}', $try,
             config('faculdade.endpoints.confirm_start_assessment')
-        ); 
+        );
 
         $response = $this->http->client()->get($endpoint,[
             'ap' => 'false',
@@ -29,7 +29,7 @@ trait HasAssessmentType {
             'cache' => random_int(1000000000000, 9999999999999)
         ]);
 
-        return isset($response['avaliacaoUsuario']) ? 
+        return isset($response['avaliacaoUsuario']) ?
         ApolAttemptDTO::fromApi($response['avaliacaoUsuario']) :
         throw new InvalidArgumentException($response['mensagens'][0]);
     }

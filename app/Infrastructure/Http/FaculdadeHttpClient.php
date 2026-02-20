@@ -19,12 +19,12 @@ class FaculdadeHttpClient implements FaculdadeClientInterface{
 
     public function signInAuthenticated(Request $request)
     {
-        $response = Http::asForm()->
-        post(config('faculdade.base_urls.login'),[
-            // 'login' => $request->ru,
-            // 'senha' => $request->password
-            'login' => config('faculdade.credentials.login'),
-            'senha' => config('faculdade.credentials.password')
+        $response = Http::post(config('faculdade.base_urls.login'),
+        [
+            'login' => (string) $request->ru,
+            'senha' => (string) $request->password
+            // 'login' => config('faculdade.credentials.login'),
+            // 'senha' => config('faculdade.credentials.password')
         ]);
 
         if (is_null($response->json())) {

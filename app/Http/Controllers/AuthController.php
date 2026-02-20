@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Contracts\FaculdadeClientInterface;
+use App\Infrastructure\Http\Session\FaculdadeSession;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -10,7 +11,7 @@ class AuthController extends Controller
 {
     public function __construct(
         protected FaculdadeClientInterface $faculdade,
-        // protected
+        protected FaculdadeSession $session,
     ) {}
 
     public function login(Request $request)
@@ -28,8 +29,14 @@ class AuthController extends Controller
             ]);
         }
 
-
         return redirect()->route('dashboard');
+    }
+
+    public function logout()
+    {
+        $this->session->logout();
+
+        return redirect()->route('login');
     }
 }
 

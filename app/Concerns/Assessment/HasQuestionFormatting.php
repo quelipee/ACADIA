@@ -15,7 +15,7 @@ trait HasQuestionFormatting {
             '{id}', $id,
             config('faculdade.endpoints.list_questions')
         );
-        
+
         $response = $this->http->client()->get($endpoint);
         return $response['avaliacaoUsuarioHistoricos'];
     }
@@ -26,7 +26,7 @@ trait HasQuestionFormatting {
             [$idAvaliacaoUsuario, $token['token']],
             config('faculdade.endpoints.list_questionsProof')
         );
-        
+
         $response = $this->http->client()->get($endpoint);
         return $response['avaliacaoUsuarioHistoricos'];
     }

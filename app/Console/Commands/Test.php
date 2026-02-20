@@ -42,10 +42,10 @@ class Test extends Command
      */
     public function handle()
     {
-        $data = new Request(['ru' => 496212, 'password' => 493614]);
+        $data = new Request(['ru' => 4697345, 'password' => 493614]);
         $this->faculdade->signInAuthenticated($data);
         $graduation = $this->graduation->getInfoListGraduation();
-        $disciplina  = $this->subject->courseDiscipline($graduation[0]->idUsuarioCurso,$graduation[0]->idCurso);
-        $this->service->resolver($disciplina, ExamActivityType::APOL, AiProvider::GEMINI);
+        $disciplina  = $this->subject->courseDiscipline($graduation[1]->idUsuarioCurso,$graduation[1]->idCurso);
+        $this->service->resolver($disciplina, ExamActivityType::MISTA, AiProvider::GEMINI);
     }
 }

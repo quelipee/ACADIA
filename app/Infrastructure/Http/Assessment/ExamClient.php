@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Infrastructure\Http\Assessment;
 
@@ -10,7 +10,7 @@ use App\Domain\Enums\ExamActivityType;
 
 class ExamClient implements ExamClientInterface{
     use HasAssessmentType, HasQuestionFormatting;
-    
+
     public function activityType() : ExamActivityType {
         return ExamActivityType::EXAM;
     }
@@ -27,7 +27,7 @@ class ExamClient implements ExamClientInterface{
         ->where('nomeClassificacaoTipo', $this->activityType()->value)
         ->values()
         ->toArray();
-        
+
         return $list_activities;
     }
 

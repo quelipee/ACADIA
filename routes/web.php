@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GraduationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Middleware\EnsureFaculdadeAuthenticated;
 use App\Http\Middleware\RedirectIfFaculdadeAuthenticated;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,16 @@ Route::middleware(RedirectIfFaculdadeAuthenticated::class)->group(function () {
 Route::middleware(EnsureFaculdadeAuthenticated::class)->group(function () {
     Route::get('/dashboard', [GraduationController::class, 'list_all_graduation'])
         ->name('dashboard');
+
+    Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+
+    Route::get('/profile', [ProfileController::class, 'profile'])
+    ->name('profile');
+
+    Route::get('/subjects/{idUsuarioCurso}/{idCurso}', [GraduationController::class, 'subjects'])
+    ->name('subjects');
+
+    Route::get('/activities/{id}/{idSalaVirtual}/{type}',[GraduationController::class, 'activities'])
+    ->name('activities');
 });
-
-
