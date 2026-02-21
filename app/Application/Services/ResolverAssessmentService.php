@@ -24,10 +24,10 @@ class ResolverAssessmentService {
     protected $avaliacaoUsuarioToken = null;
 
     public function resolver(array $disciplina , AiProvider $provider) : void {
-        $type = ExamActivityType::from($disciplina['nomeClassificacaoTipo']);
+        $type = ExamActivityType::from($disciplina['data']['nomeClassificacaoTipo']);
         $clientService = $this->factory->make($type);
 
-        $activity = $this->resolve_apol->resolver($disciplina['cID'], $disciplina['cIdAvaliacaoVinculada'], $type);
+        $activity = $this->resolve_apol->resolver($disciplina['data']['cID'], $disciplina['data']['cIdAvaliacaoVinculada'], $type);
 
         if ($type == ExamActivityType::EXAM) {
             $this->avaliacaoUsuarioToken = $clientService->photoConfirmation($activity->id);

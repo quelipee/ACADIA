@@ -53,7 +53,8 @@ class GraduationController extends Controller
         ]);
     }
 
-    public function answer_activity(Request $data,) {
-        $this->resolver->resolver($data->toArray(), AiProvider::LLAMA);
+    public function answer_activity(Request $data) {
+        $provider = AiProvider::from($data['ai']);
+        $this->resolver->resolver($data->toArray(), $provider);
     }
 }
