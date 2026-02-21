@@ -32,4 +32,10 @@ Route::middleware(EnsureFaculdadeAuthenticated::class)->group(function () {
 
     Route::get('/activities/{id}/{idSalaVirtual}/{type}',[GraduationController::class, 'activities'])
     ->name('activities');
+
+    Route::get('/activity_attempts/{cId}', [GraduationController::class, 'activity_attempts'])
+    ->name('activity_attempts');
+
+    Route::post('/answer_activity', [GraduationController::class, 'answer_activity'])
+    ->name('answer_activity');
 });

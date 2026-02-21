@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
 
-const props = defineProps({
+const { subjects, graduation } = defineProps({
   subjects: {
     type: Array,
     default: () => []
@@ -19,19 +19,31 @@ const props = defineProps({
 const menuOpen = ref(false)
 const selectedSubject = ref(null)
 const searchQuery = ref('')
-const filterOpen = ref(false)
-const selectedActivityType = ref('Objetiva') // APOL, PROVAS, MISTA
+const selectedActivityType = ref('Objetiva')
+const activeTab = ref('em-andamento') // 'em-andamento' ou 'concluidas'
 
 // Iniciais do nome do usuário
 const userInitial = computed(() => {
   return 'U'
 })
 
-// Filtrar matérias por busca
-const filteredSubjects = computed(() => {
-  if (!searchQuery.value) return props.subjects
+// Disciplinas em andamento
+const subjectsInProgress = computed(() => {
+  return subjects.filter(subject => !subject.statusConcluido)
+})
 
-  return props.subjects.filter(subject =>
+// Disciplinas concluídas
+const subjectsCompleted = computed(() => {
+  return subjects.filter(subject => subject.statusConcluido)
+})
+
+// Filtrar matérias por busca (baseado na aba ativa)
+const filteredSubjects = computed(() => {
+  const sourceSubjects = activeTab.value === 'em-andamento' ? subjectsInProgress.value : subjectsCompleted.value
+
+  if (!searchQuery.value) return sourceSubjects
+
+  return sourceSubjects.filter(subject =>
     subject.nome.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 })
@@ -192,6 +204,52 @@ const copyToClipboard = (text, label) => {
         </div>
       </header>
 
+      <!-- ABAS: EM ANDAMENTO E CONCLUÍDAS -->
+      <section class="mb-8">
+        <div class="flex gap-2 border-b border-white/10">
+          <!-- Aba: Em Andamento -->
+          <button
+            @click="activeTab = 'em-andamento'"
+            :class="`px-6 py-4 font-bold transition-all duration-200 border-b-2 text-sm ${
+              activeTab === 'em-andamento'
+                ? 'border-[#63cab7] text-[#63cab7]'
+                : 'border-transparent text-gray-400 hover:text-[#e8eaf0]'
+            }`">
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+              </svg>
+              Em Andamento
+              <span class="ml-2 px-2 py-1 bg-white/10 rounded-full text-xs">
+                {{ subjectsInProgress.length }}
+              </span>
+            </div>
+          </button>
+
+          <!-- Aba: Concluídas -->
+          <button
+            @click="activeTab = 'concluidas'"
+            :class="`px-6 py-4 font-bold transition-all duration-200 border-b-2 text-sm ${
+              activeTab === 'concluidas'
+                ? 'border-[#63cab7] text-[#63cab7]'
+                : 'border-transparent text-gray-400 hover:text-[#e8eaf0]'
+            }`">
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Concluídas
+              <span class="ml-2 px-2 py-1 bg-white/10 rounded-full text-xs">
+                {{ subjectsCompleted.length }}
+              </span>
+            </div>
+          </button>
+        </div>
+      </section>
+
       <!-- CONTROLES: BUSCA E FILTROS -->
       <section class="mb-8 flex flex-col md:flex-row gap-4 items-stretch md:items-center">
         <!-- Search -->
@@ -222,14 +280,16 @@ const copyToClipboard = (text, label) => {
       </section>
 
       <!-- LISTA VAZIA -->
-      <div v-if="subjects.length === 0" class="text-center py-12">
+      <div v-if="filteredSubjects.length === 0" class="text-center py-12">
         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"
              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              class="mx-auto text-gray-500 mb-4 opacity-50">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
-        <p class="text-gray-400 text-lg">Nenhuma matéria encontrada</p>
+        <p class="text-gray-400 text-lg">
+          {{ activeTab === 'em-andamento' ? 'Nenhuma matéria em andamento' : 'Nenhuma matéria concluída' }}
+        </p>
       </div>
 
       <!-- GRID DE MATÉRIAS -->
@@ -241,7 +301,18 @@ const copyToClipboard = (text, label) => {
                     hover:border-[#63cab780]
                     hover:shadow-[0_0_0_1px_rgba(99,202,183,0.2),0_24px_64px_rgba(99,202,183,0.08)]
                     transition-all duration-300 cursor-pointer
-                    hover:-translate-y-1">
+                    hover:-translate-y-1 relative">
+
+          <!-- Indicador de status (canto superior direito) -->
+          <div v-if="subject.statusConcluido" class="absolute top-4 right-4">
+            <span class="inline-flex items-center gap-1 bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Concluída
+            </span>
+          </div>
 
           <!-- Badge -->
           <div class="mb-4">
@@ -309,7 +380,12 @@ const copyToClipboard = (text, label) => {
 
           <!-- Header do modal -->
           <div class="flex items-center justify-between p-6 border-b border-white/10">
-            <h2 class="text-2xl font-bold text-[#e8eaf0]">Detalhes da Matéria</h2>
+            <div>
+              <h2 class="text-2xl font-bold text-[#e8eaf0]">Detalhes da Matéria</h2>
+              <p v-if="selectedSubject.statusConcluido" class="text-sm text-green-400 font-semibold mt-1">
+                ✓ Disciplina Concluída
+              </p>
+            </div>
             <button
               @click="closeSubjectDetails"
               class="p-2 text-gray-400 hover:text-[#63cab7] hover:bg-white/10
@@ -451,39 +527,39 @@ const copyToClipboard = (text, label) => {
               </div>
             </div>
 
-            <!-- NOVO: Seleção de Tipo de Atividade -->
-            <div>
+            <!-- Seleção de Tipo de Atividade (apenas se NÃO concluída) -->
+            <div v-if="!selectedSubject.statusConcluido">
               <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-3">
                 Tipo de Atividade
               </label>
               <div class="grid grid-cols-3 gap-3">
-                <!-- APOL -->
+                <!-- Objetiva -->
                 <button
                   @click="selectedActivityType = 'Objetiva'"
                   :class="`px-4 py-3 rounded-lg border-2 font-bold transition-all duration-200 ${
-                    selectedActivityType === 'APOL'
+                    selectedActivityType === 'Objetiva'
                       ? 'bg-[#63cab7] border-[#63cab7] text-[#0a1a17]'
                       : 'bg-white/5 border-white/10 text-[#e8eaf0] hover:border-[#63cab7] hover:bg-white/10'
                   }`">
                   APOL
                 </button>
 
-                <!-- PROVAS -->
+                <!-- Discursiva -->
                 <button
                   @click="selectedActivityType = 'Discursiva'"
                   :class="`px-4 py-3 rounded-lg border-2 font-bold transition-all duration-200 ${
-                    selectedActivityType === 'PROVAS'
+                    selectedActivityType === 'Discursiva'
                       ? 'bg-[#63cab7] border-[#63cab7] text-[#0a1a17]'
                       : 'bg-white/5 border-white/10 text-[#e8eaf0] hover:border-[#63cab7] hover:bg-white/10'
                   }`">
                   PROVAS
                 </button>
 
-                <!-- MISTA -->
+                <!-- Mista -->
                 <button
                   @click="selectedActivityType = 'Mista'"
                   :class="`px-4 py-3 rounded-lg border-2 font-bold transition-all duration-200 ${
-                    selectedActivityType === 'MISTA'
+                    selectedActivityType === 'Mista'
                       ? 'bg-[#63cab7] border-[#63cab7] text-[#0a1a17]'
                       : 'bg-white/5 border-white/10 text-[#e8eaf0] hover:border-[#63cab7] hover:bg-white/10'
                   }`">
@@ -499,6 +575,13 @@ const copyToClipboard = (text, label) => {
               </div>
             </div>
 
+            <!-- Mensagem para concluídas -->
+            <div v-else class="px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <p class="text-sm text-green-400 font-semibold">
+                ✓ Esta disciplina foi concluída com sucesso!
+              </p>
+            </div>
+
           </div>
 
           <!-- Footer -->
@@ -511,11 +594,20 @@ const copyToClipboard = (text, label) => {
               Fechar
             </button>
             <button
-            @click="open_activies(selectedSubject, selectedActivityType)"
+              v-if="!selectedSubject.statusConcluido"
+              @click="open_activies(selectedSubject, selectedActivityType)"
               class="flex-1 px-4 py-2 rounded-lg bg-[#63cab7] text-[#0a1a17]
                      hover:bg-[#5ab5a8]
                      transition-colors duration-200 font-bold">
               Acessar Sala
+            </button>
+            <button
+              v-else
+              disabled
+              class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white
+                     cursor-not-allowed opacity-70
+                     transition-colors duration-200 font-bold">
+              Concluída ✓
             </button>
           </div>
 

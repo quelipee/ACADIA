@@ -2,6 +2,7 @@
 
 namespace App\Application\Services;
 
+use App\Concerns\Assessment\HasAssessmentType;
 use App\Domain\Contracts\AIClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\Enums\AiProvider;
@@ -11,6 +12,7 @@ use App\Infrastructure\Http\Assessment\Factories\ExamClientFactory;
 use InvalidArgumentException;
 
 class ResolverAssessmentService {
+    use HasAssessmentType;
 
     public function __construct(
         private AiProviderFactory $factoryProvider,
@@ -21,13 +23,12 @@ class ResolverAssessmentService {
     {}
     protected $avaliacaoUsuarioToken = null;
 
-    public function resolver(array $disciplina ,ExamActivityType $type, AiProvider $provider) : void {
-        // $clientService = $this->factory->make($type);
+    public function resolver(array $disciplina , AiProvider $provider) : void {
+        $type = ExamActivityType::from($disciplina['nomeClassificacaoTipo']);
+        $clientService = $this->factory->make($type);
 
-        // // ingles usa o idSalaVirtualOfertaAtual e a graduacao usa idSalaVirtualOfertaAproveitamento
-        // $all_activities = $clientService->listStudentActivity($disciplina[2]->id,$disciplina[2]->idSalaVirtualOfertaAproveitamento);
-        // $activity = $this->resolve_apol->resolver($all_activities[0]->cID, $all_activities[0]->cIdAvaliacaoVinculada, $type);
-        dd('$activity');
+        $activity = $this->resolve_apol->resolver($disciplina['cID'], $disciplina['cIdAvaliacaoVinculada'], $type);
+
         if ($type == ExamActivityType::EXAM) {
             $this->avaliacaoUsuarioToken = $clientService->photoConfirmation($activity->id);
         }
@@ -72,8 +73,12 @@ class ResolverAssessmentService {
 
     public function get_all_activities(int $id, int $idSalaVirtualOfertaAproveitamento, ExamActivityType $type) {
         $clientService = $this->factory->make($type);
-        
+
         $all_activities = $clientService->listStudentActivity($id,$idSalaVirtualOfertaAproveitamento);
         return $all_activities;
+    }
+
+    public function attempts(string $cId) {
+        return $this->getAllTheNotesFromTheActivities($cId);
     }
 }

@@ -23,7 +23,7 @@ class Disciplina implements DisciplinaClientInterface{
         $response = $this->http->client()->get($endpoint,[
             'idUsuarioCurso' => $idUserCourse
         ]);
-        
+
         foreach ($response['salaVirtuais'] as $subject) {
             $list_disciplina[] = DisciplinaDTO::fromApi($subject);
         }

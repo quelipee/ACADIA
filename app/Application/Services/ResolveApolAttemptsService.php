@@ -18,14 +18,14 @@ class ResolveApolAttemptsService {
         $maxTry = 0;
 
         foreach($list_try as $list) {
-            if ($list->status == ActivityStatus::START->value 
+            if ($list->status == ActivityStatus::START->value
             and $list->tentativa <= $list->tentativaTotal) {
                 return $list;
             }
 
             $maxTry = max($maxTry,$list->tentativa);
         }
-
+        
         return $client->confirmStartAssessment($cIdAvaliacao, $cIdAvaliacaoVinculada, $maxTry +1);
     }
 }

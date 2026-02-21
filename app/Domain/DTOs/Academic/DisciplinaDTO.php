@@ -11,6 +11,7 @@ readonly class DisciplinaDTO {
         public int $idSalaVirtualOfertaAtual,
         public int|null $idSalaVirtualOfertaAproveitamento,
         public string $nome,
+        public bool $statusConcluido,
     )
     {}
 
@@ -19,7 +20,7 @@ readonly class DisciplinaDTO {
             throw new InvalidArgumentException('Essa materia não existe!!');
         }
 
-        $idSalaVirtualOfertaAproveitamento = $request['idSalaVirtualOfertaAproveitamento'] 
+        $idSalaVirtualOfertaAproveitamento = $request['idSalaVirtualOfertaAproveitamento']
         ?? $request['idSalaVirtualOfertaAtual'];
 
         return new self(
@@ -29,6 +30,7 @@ readonly class DisciplinaDTO {
             idSalaVirtualOfertaAtual: $request['idSalaVirtualOfertaAtual'],
             idSalaVirtualOfertaAproveitamento: $idSalaVirtualOfertaAproveitamento,
             nome: $request['nome'],
+            statusConcluido: $request['statusConcluido']
         );
     }
 }

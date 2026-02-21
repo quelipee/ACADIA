@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Application\Services\ResolverAssessmentService;
 use App\Domain\Contracts\Academic\DisciplinaClientInterface;
 use App\Domain\Contracts\Academic\GraduationClientInterface;
+use App\Domain\Enums\AiProvider;
 use App\Domain\Enums\ExamActivityType;
 use App\Infrastructure\Http\Session\FaculdadeSession;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class GraduationController extends Controller
@@ -40,5 +42,17 @@ class GraduationController extends Controller
         return Inertia::render('Graduation/Activities', [
             'activities' => $activities
         ]);
+    }
+
+    public function activity_attempts(string $cId) {
+        $data = $this->resolver->attempts($cId);
+
+        return Inertia::render('Graduation/Activityattempts',[
+            'attempts' => $data
+        ]);
+    }
+
+    public function answer_activity(Request $data,) {
+        $this->resolver->resolver($data->toArray(), AiProvider::LLAMA);
     }
 }

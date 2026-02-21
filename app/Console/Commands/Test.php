@@ -46,6 +46,6 @@ class Test extends Command
         $this->faculdade->signInAuthenticated($data);
         $graduation = $this->graduation->getInfoListGraduation();
         $disciplina  = $this->subject->courseDiscipline($graduation[1]->idUsuarioCurso,$graduation[1]->idCurso);
-        $this->service->resolver($disciplina, ExamActivityType::MISTA, AiProvider::GEMINI);
+        $this->service->resolver($disciplina, AiProvider::GEMINI);
     }
 }
