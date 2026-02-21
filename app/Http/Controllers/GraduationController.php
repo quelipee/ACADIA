@@ -25,7 +25,8 @@ class GraduationController extends Controller
         $graduationData = $this->graduation->getInfoListGraduation();
 
         return Inertia::render('Dashboard', ['graduation' => $graduationData,
-        'name' => $this->session->getHeaders()['X-Nome']]);
+        // 'name' => $this->session->getHeaders()['X-Nome']
+    ]);
     }
 
     public function subjects(int $idUsuarioCurso, int $idCurso) {

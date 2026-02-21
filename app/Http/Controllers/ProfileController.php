@@ -14,11 +14,10 @@ class ProfileController extends Controller
     {}
 
     public function profile () {
-        $headers = $this->session->getHeaders();
-        $userDTO = UserProfileDTO::fromArray($headers);
-        
+        $user = $this->session->getUser();
+
         return Inertia::render('Profile', [
-            'user' => $userDTO->toArray(),
+            'user' => $user,
         ]);
     }
 }

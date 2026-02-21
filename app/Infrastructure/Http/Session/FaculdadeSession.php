@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Http\Session;
 
+use App\Domain\DTOs\Profile\UserProfileDTO;
 use Illuminate\Support\Facades\Session;
 
 class FaculdadeSession {
@@ -29,17 +30,25 @@ class FaculdadeSession {
 
     public function getCookies() : array {
         return Session::get(self::SESSION_KEY_COOKIES, []);
-        // return $this->cookies;
     }
 
     public function getHeaders() : array {
         return Session::get(self::SESSION_KEY_HEADERS, []);
-        // return $this->headers;
     }
 
     public function isAuthenticated() :bool {
-        return !empty($this->getCookies());
+        return !empty($this->getHeaders());
         // return !empty($this->cookies);
+    }
+
+    public function getUser() : ?array{
+        if (!$this->isAuthenticated()) {
+            return null;
+        }
+
+        $headers = $this->getHeaders();
+
+        return UserProfileDTO::fromArray($headers)->toArray();
     }
 
     public function logout(): void {

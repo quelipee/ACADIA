@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\DTOs\Profile\UserProfileDTO;
+use App\Infrastructure\Http\Session\FaculdadeSession;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,9 +37,16 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $session = app(FaculdadeSession::class);
+        $user = $session->getUser();
+        
         return [
             ...parent::share($request),
-            //
+
+            'auth' => [
+                'user' => $user,
+                'isAuthenticated' => $session->isAuthenticated()
+            ]
         ];
     }
 }
