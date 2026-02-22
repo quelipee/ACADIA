@@ -10,6 +10,8 @@ const { activities } = defineProps({
   },
 })
 
+const loading = ref(false)
+
 const selectedActivity = ref(null)
 const searchQuery = ref('')
 const filterStatus = ref('todos')
@@ -155,12 +157,21 @@ const chooseWithoutAI = () => {
 
 const confirmAccess = () => {
   const ai = useAI.value ? selectedAI.value?.id : null
-//   console.log(selectedActivity.value.cID)
+
+  loading.value = true
+
   router.post(`/answer_activity/${selectedActivity.value.cID}`, {
-    'ai': ai,
-    'data': selectedActivity.value
-   })
-//   router.get(`/activity/${selectedActivity.value.cID}`, { ai })
+    ai: ai,
+    data: selectedActivity.value
+  }, {
+    preserveState: false,
+    onSuccess: () => {
+      closeActivityDetails()
+    },
+    onFinish: () => {
+      loading.value = false
+    }
+  })
 }
 
 const copyToClipboard = (text, label) => {
@@ -266,7 +277,18 @@ const stepBack = () => {
            @click="closeActivityDetails"
            class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6">
 
-        <div @click.stop class="bg-[#111318] border border-white/10 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_25px_50px_rgba(0,0,0,0.5)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div @click.stop class="relative bg-[#111318] border border-white/10 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_25px_50px_rgba(0,0,0,0.5)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+            <div v-if="loading"
+                    class="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
+
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="w-10 h-10 border-4 border-[#63cab7]/30 border-t-[#63cab7] rounded-full animate-spin"></div>
+                        <p class="text-[#63cab7] font-semibold">{{ selectedAI.name }} Resolvendo atividade...</p>
+                    </div>
+
+            </div>
+
 
           <!-- Header -->
           <div class="sticky top-0 bg-[#111318] border-b border-white/10 flex items-center justify-between p-6 z-10">
@@ -601,10 +623,10 @@ const stepBack = () => {
                 </button>
                 <button
                   @click="confirmAccess"
-                  :disabled="!selectedAI"
+                  :disabled="!selectedAI || loading"
                   :class="[
                     'flex-1 px-4 py-3 rounded-lg font-bold transition-all duration-200',
-                    selectedAI
+                    selectedAI && !loading
                       ? 'bg-[#63cab7] text-[#0a1a17] hover:bg-[#5ab5a8]'
                       : 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed'
                   ]">
