@@ -25,7 +25,6 @@ class GraduationController extends Controller
         $graduationData = $this->graduation->getInfoListGraduation();
 
         return Inertia::render('Dashboard', ['graduation' => $graduationData,
-        // 'name' => $this->session->getHeaders()['X-Nome']
     ]);
     }
 
@@ -41,7 +40,8 @@ class GraduationController extends Controller
         $activities = $this->resolver->get_all_activities($id, $idSalaVirtualOfertaAproveitamento, $type);
 
         return Inertia::render('Graduation/Activities', [
-            'activities' => $activities
+            'activities' => $activities,
+            'idSalaVirtualOfertaAproveitamento' => $idSalaVirtualOfertaAproveitamento
         ]);
     }
 
@@ -53,8 +53,33 @@ class GraduationController extends Controller
         ]);
     }
 
-    public function answer_activity(Request $data) {
+    public function answer_activity(Request $request) {
+        $data = $this->resolver->formattedQuestions($request->toArray());
+        return Inertia::render('Graduation/Activities/ActivityQuestion', [
+            'questions' => $data,
+            'idSalaVirtualOfertaAproveitamento' => $request['idSalaVirtualOfertaAproveitamento'],
+            'idSalaVirtual' => $request['data']['idSalaVirtual'],
+            'typeExam' => $request['data']['nomeClassificacaoTipo']
+        ]);
+    }
+
+    public function selected_alternative(Request $request, int $idQuestaoAlternativa) {
+        $this->resolver->resolver($request->toArray(), $idQuestaoAlternativa);
+    }
+
+    public function handleFormSubmit(Request $request)
+    {
+        $this->resolver->submit_activity($request->toArray());
+
+        return redirect()->route('activities', [
+            'id' => $request['idSalaVirtual'],
+            'idSalaVirtual' => $request['idSalaVirtualOfertaAproveitamento'],
+            'type' => $request['typeExam'],
+        ]);
+    }
+
+    public function answer_activity_ai(Request $data) {
         $provider = AiProvider::from($data['ai']);
-        $this->resolver->resolver($data->toArray(), $provider);
+        $this->resolver->resolverAI($data->toArray(), $provider);
     }
 }

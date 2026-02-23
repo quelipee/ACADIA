@@ -9,6 +9,7 @@ use App\Domain\Enums\AiProvider;
 use App\Domain\Enums\ExamActivityType;
 use App\Infrastructure\Http\Assessment\Factories\AiProviderFactory;
 use App\Infrastructure\Http\Assessment\Factories\ExamClientFactory;
+use Inertia\Inertia;
 use InvalidArgumentException;
 
 class ResolverAssessmentService {
@@ -23,7 +24,35 @@ class ResolverAssessmentService {
     {}
     protected $avaliacaoUsuarioToken = null;
 
-    public function resolver(array $disciplina , AiProvider $provider) : void {
+    public function formattedQuestions($disciplina) : array {
+        return $this->get_list_question($disciplina);
+    }
+
+    public function resolver(array $data ,int $idQuestaoAlternativa) : void {
+        $response = $this->http->client()
+        ->put(config('faculdade.endpoints.send_response'),[
+            'id' => $data['question']['id'],
+            'idQuestaoAlternativa' => $idQuestaoAlternativa,
+            'idAvaliacaoUsuario' => $data['question']['idAvaliacaoUsuario'],
+        ]);
+
+        if(!$response->successful()){
+            dd($response->status());
+            throw new InvalidArgumentException($response->status());
+        }
+
+        print_r($idQuestaoAlternativa);
+    }
+
+    public function submit_activity(array $data) : void {
+        $endpoint = str_replace(
+            '{idAvaliacaoUsuario}', $data['question']['idAvaliacaoUsuario'],
+            config('faculdade.endpoints.finish_assessment')
+        );
+        $this->http->client()->get($endpoint);
+    }
+
+    public function resolverAI(array $disciplina , AiProvider $provider) : void {
         $type = ExamActivityType::from($disciplina['data']['nomeClassificacaoTipo']);
         $clientService = $this->factory->make($type);
 
@@ -80,5 +109,23 @@ class ResolverAssessmentService {
 
     public function attempts(string $cId) {
         return $this->getAllTheNotesFromTheActivities($cId);
+    }
+
+    public function get_list_question(array $disciplina) : array {
+        $type = ExamActivityType::from($disciplina['data']['nomeClassificacaoTipo']);
+        $clientService = $this->factory->make($type);
+
+        $activity = $this->resolve_apol->resolver($disciplina['data']['cID'], $disciplina['data']['cIdAvaliacaoVinculada'], $type);
+
+        if ($type == ExamActivityType::EXAM) {
+            $this->avaliacaoUsuarioToken = $clientService->photoConfirmation($activity->id);
+        }
+
+        $list =  $clientService->listAllQuestion($activity->id, $this->avaliacaoUsuarioToken);
+        foreach($list as $data) {
+            $questionsFormmated[] = $clientService->hasQuestionFormatting($data);
+        }
+
+        return $questionsFormmated;
     }
 }

@@ -37,6 +37,15 @@ Route::middleware(EnsureFaculdadeAuthenticated::class)->group(function () {
     Route::get('/activity_attempts/{cId}', [GraduationController::class, 'activity_attempts'])
     ->name('activity_attempts');
 
-    Route::post('/answer_activity/{cID}', [GraduationController::class, 'answer_activity'])
+    Route::get('/answer_activity/{cID}', [GraduationController::class, 'answer_activity'])
     ->name('answer_activity');
+
+    Route::post('/activities/{activity}/complete', [GraduationController::class , 'handleFormSubmit'])
+    ->name('handleFormSubmit');
+
+    Route::post('/selected_alternative/{alternativeId}', [GraduationController::class, 'selected_alternative'])
+    ->name('selected_alternative');
+
+    Route::post('/answer_activity/{ai}/{cID}', [GraduationController::class, 'answer_activity_ai'])
+    ->name('answer_activity_ai');
 });

@@ -3,11 +3,14 @@ import { ref, computed, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import PageHeader from '../../components/layout/PageHeader.vue';
 
-const { activities } = defineProps({
+const { activities, idSalaVirtualOfertaAproveitamento } = defineProps({
   activities: {
     type: Array,
     default: () => []
   },
+  idSalaVirtualOfertaAproveitamento : {
+    type: Number
+  }
 })
 
 const loading = ref(false)
@@ -156,22 +159,32 @@ const chooseWithoutAI = () => {
 }
 
 const confirmAccess = () => {
-  const ai = useAI.value ? selectedAI.value?.id : null
+    if (!selectedActivity.value) return
 
-  loading.value = true
-
-  router.post(`/answer_activity/${selectedActivity.value.cID}`, {
-    ai: ai,
-    data: selectedActivity.value
-  }, {
-    preserveState: false,
-    onSuccess: () => {
-      closeActivityDetails()
-    },
-    onFinish: () => {
-      loading.value = false
+    if (!useAI.value) {
+        router.get(`/answer_activity/${selectedActivity.value.cID}`,{
+            data: selectedActivity.value,
+            idSalaVirtualOfertaAproveitamento: idSalaVirtualOfertaAproveitamento
+        })
+        return
     }
-  })
+
+    if (useAI.value && selectedAI.value) {
+        loading.value = true
+
+        router.post(`/answer_activity/${selectedAI.value.name}/${selectedActivity.value.cID}`, {
+            ai: selectedAI.value.id,
+            data: selectedActivity.value
+        }, {
+            preserveState: false,
+            onSuccess: () => {
+            closeActivityDetails()
+            },
+            onFinish: () => {
+            loading.value = false
+            }
+        })
+    }
 }
 
 const copyToClipboard = (text, label) => {
@@ -184,7 +197,7 @@ const uniqueStatuses = computed(() => {
 })
 
 const Activityattempts = (data) => {
-  router.get(`/activity_attempts/${data.cID}`)
+    router.get(`/activity_attempts/${data.cID}`)
 }
 
 const stepBack = () => {
