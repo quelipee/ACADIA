@@ -1,29 +1,35 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { router } from '@inertiajs/vue3'
-import PageHeader from '../../components/layout/PageHeader.vue';
+import PageHeader from '../../components/layout/PageHeader.vue'
 
 const { activities, idSalaVirtualOfertaAproveitamento } = defineProps({
   activities: {
     type: Array,
     default: () => []
   },
-  idSalaVirtualOfertaAproveitamento : {
-    type: Number
+  idSalaVirtualOfertaAproveitamento: {
+    type: [Number, String],
+    required: true
   }
 })
 
+// Estado
 const loading = ref(false)
-
 const selectedActivity = ref(null)
 const searchQuery = ref('')
-const filterStatus = ref('todos')
-
-// Modal step: 'details' | 'ai-choice' | 'ai-select'
+const activeTab = ref('em-andamento') // 'em-andamento' ou 'concluidas'
 const modalStep = ref('details')
 const useAI = ref(null)
 const selectedAI = ref(null)
 
+// Abas
+const tabs = [
+  { id: 'em-andamento', label: 'Em Andamento', icon: '⟳' },
+  { id: 'concluidas', label: 'Concluídas', icon: '✓' }
+]
+
+// AI Providers
 const aiProviders = [
   {
     id: 'openai',
@@ -33,7 +39,6 @@ const aiProviders = [
     color: '#10a37f',
     gradient: 'from-[#10a37f]/20 to-[#10a37f]/5',
     border: 'border-[#10a37f]/40',
-    hoverBorder: 'hover:border-[#10a37f]',
   },
   {
     id: 'gemini',
@@ -43,7 +48,6 @@ const aiProviders = [
     color: '#4285f4',
     gradient: 'from-[#4285f4]/20 to-[#4285f4]/5',
     border: 'border-[#4285f4]/40',
-    hoverBorder: 'hover:border-[#4285f4]',
   },
   {
     id: 'claude',
@@ -53,7 +57,6 @@ const aiProviders = [
     color: '#cc785c',
     gradient: 'from-[#cc785c]/20 to-[#cc785c]/5',
     border: 'border-[#cc785c]/40',
-    hoverBorder: 'hover:border-[#cc785c]',
   },
   {
     id: 'grok',
@@ -63,7 +66,6 @@ const aiProviders = [
     color: '#e8eaf0',
     gradient: 'from-white/10 to-white/5',
     border: 'border-white/20',
-    hoverBorder: 'hover:border-white/60',
   },
   {
     id: 'llama',
@@ -73,7 +75,6 @@ const aiProviders = [
     color: '#0064e0',
     gradient: 'from-[#0064e0]/20 to-[#0064e0]/5',
     border: 'border-[#0064e0]/40',
-    hoverBorder: 'hover:border-[#0064e0]',
   },
   {
     id: 'deepseek',
@@ -83,37 +84,46 @@ const aiProviders = [
     color: '#5b6af0',
     gradient: 'from-[#5b6af0]/20 to-[#5b6af0]/5',
     border: 'border-[#5b6af0]/40',
-    hoverBorder: 'hover:border-[#5b6af0]',
   },
 ]
 
-// Filtrar atividades
-const filteredActivities = computed(() => {
-  let filtered = activities
-  if (searchQuery.value) {
-    filtered = filtered.filter(activity =>
-      activity.nameActivities.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
-  if (filterStatus.value !== 'todos') {
-    filtered = filtered.filter(activity =>
-      activity.status.toLowerCase() === filterStatus.value.toLowerCase()
-    )
-  }
-  return filtered
+// Computadas - Separar por status
+const emAndamento = computed(() => {
+    const nowDate = new Date()
+    return activities.filter(activity => {
+        const isActive = activity.status !== 'Finalizada' && activity.status !== 'Concluída'
+        const status = new Date(activity.dataInicio) <= nowDate && new Date(activity.dataFim) >= nowDate
+        const tryActivity = activity.tentativa <= activity.tentativaTotal
+        return tryActivity && status && isActive && activity.nameActivities.toLowerCase().includes(searchQuery.value.toLowerCase())
+  })
 })
 
+const concluidas = computed(() => {
+  return activities.filter(activity => {
+    const isCompleted = activity.status === 'Finalizada' || activity.status === 'Concluída'
+    return isCompleted && activity.nameActivities.toLowerCase().includes(searchQuery.value.toLowerCase())
+  })
+})
+
+const exibindo = computed(() => {
+  return activeTab.value === 'em-andamento' ? emAndamento.value : concluidas.value
+})
+
+// Cores e badges
 const getStatusColor = (status) => {
   const statusMap = {
     'Finalizada': { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
+    'Concluída': { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
     'Pendente': { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30' },
     'Em Progresso': { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
+    'Aguardando início': { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' },
     'Não Iniciada': { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30' }
   }
   return statusMap[status] || statusMap['Não Iniciada']
 }
 
 const getNoteColor = (nota) => {
+  if (!nota) return 'text-gray-400'
   if (nota >= 90) return 'text-green-400'
   if (nota >= 70) return 'text-yellow-400'
   if (nota >= 50) return 'text-orange-400'
@@ -123,13 +133,16 @@ const getNoteColor = (nota) => {
 const getStatusBadge = (status) => {
   const badgeMap = {
     'Finalizada': '✓',
+    'Concluída': '✓',
     'Pendente': '⏱',
     'Em Progresso': '⟳',
+    'Aguardando início': '◯',
     'Não Iniciada': '◯'
   }
   return badgeMap[status] || '•'
 }
 
+// Métodos
 const openActivityDetails = (activity) => {
   selectedActivity.value = activity
   modalStep.value = 'details'
@@ -158,46 +171,47 @@ const chooseWithoutAI = () => {
   confirmAccess()
 }
 
-const confirmAccess = () => {
-    if (!selectedActivity.value) return
-
-    if (!useAI.value) {
-        router.get(`/answer_activity/${selectedActivity.value.cID}`,{
-            data: selectedActivity.value,
-            idSalaVirtualOfertaAproveitamento: idSalaVirtualOfertaAproveitamento
-        })
-        return
-    }
-
-    if (useAI.value && selectedAI.value) {
-        loading.value = true
-
-        router.post(`/answer_activity/${selectedAI.value.name}/${selectedActivity.value.cID}`, {
-            ai: selectedAI.value.id,
-            data: selectedActivity.value
-        }, {
-            preserveState: false,
-            onSuccess: () => {
-            closeActivityDetails()
-            },
-            onFinish: () => {
-            loading.value = false
-            }
-        })
-    }
+const getActivityId = (activity) => {
+  return activity.nomeClassificacaoTipo === 'Discursiva'
+    ? activity.cIdAvaliacaoVinculada
+    : activity.cID
 }
 
-const copyToClipboard = (text, label) => {
+const confirmAccess = () => {
+  if (!selectedActivity.value) return
+
+  if (!useAI.value) {
+    router.get(`/answer_activity/${getActivityId(selectedActivity.value)}`, {
+      data: selectedActivity.value,
+      idSalaVirtualOfertaAproveitamento
+    })
+    return
+  }
+
+  if (useAI.value && selectedAI.value) {
+    loading.value = true
+
+    router.post(`/answer_activity/${selectedAI.value.name}/${getActivityId(selectedActivity.value)}`, {
+      ai: selectedAI.value.id,
+      data: selectedActivity.value
+    }, {
+      preserveState: false,
+      onSuccess: () => {
+        closeActivityDetails()
+      },
+      onFinish: () => {
+        loading.value = false
+      }
+    })
+  }
+}
+
+const copyToClipboard = (text) => {
   navigator.clipboard.writeText(text)
 }
 
-const uniqueStatuses = computed(() => {
-  const statuses = activities.map(a => a.status)
-  return [...new Set(statuses)]
-})
-
 const Activityattempts = (data) => {
-    router.get(`/activity_attempts/${data.cID}`)
+  router.get(`/activity_attempts/${data.cID}`)
 }
 
 const stepBack = () => {
@@ -209,6 +223,7 @@ const stepBack = () => {
 <template>
   <div class="relative min-h-screen bg-[#0a0c10] font-sans overflow-x-hidden">
 
+    <!-- Orbs decorativas -->
     <div class="fixed w-[500px] h-[500px] bg-[radial-gradient(circle,#1a4a42,transparent)] rounded-full blur-[80px] opacity-25 -top-[200px] -left-[200px] pointer-events-none"></div>
     <div class="fixed w-[400px] h-[400px] bg-[radial-gradient(circle,#0d2d4a,transparent)] rounded-full blur-[80px] opacity-25 -bottom-[150px] -right-[150px] pointer-events-none"></div>
     <div class="fixed w-[300px] h-[300px] bg-[radial-gradient(circle,#2a1a4a,transparent)] rounded-full blur-[80px] opacity-25 top-1/2 right-[10%] pointer-events-none"></div>
@@ -217,8 +232,31 @@ const stepBack = () => {
 
       <page-header title="Atividades" subtitle="Suas atividades e avaliações"/>
 
-      <section class="mb-8 flex flex-col md:flex-row gap-4 items-stretch">
-        <div class="flex-1 relative">
+      <!-- ABAS -->
+      <div class="mb-8">
+        <div class="flex items-center gap-2 border-b border-white/10">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            :class="[
+              'flex items-center gap-2 px-6 py-3 font-semibold text-sm uppercase tracking-wider transition-all duration-200',
+              activeTab === tab.id
+                ? 'text-[#63cab7] border-b-2 border-[#63cab7]'
+                : 'text-gray-500 hover:text-gray-400'
+            ]">
+            <span>{{ tab.icon }}</span>
+            <span>{{ tab.label }}</span>
+            <span class="ml-2 text-xs bg-white/10 px-2 py-1 rounded-full">
+              {{ activeTab === tab.id ? (tab.id === 'em-andamento' ? emAndamento.length : concluidas.length) : (tab.id === 'em-andamento' ? emAndamento.length : concluidas.length) }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- BUSCA -->
+      <section class="mb-8">
+        <div class="flex-1 relative max-w-md">
           <input
             v-model="searchQuery"
             type="text"
@@ -229,23 +267,18 @@ const stepBack = () => {
             <path d="m21 21-4.35-4.35"/>
           </svg>
         </div>
-        <select v-model="filterStatus" class="px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] focus:border-[#63cab7] focus:outline-none transition-all duration-200 min-w-[180px]">
-          <option value="todos">Todos os Status</option>
-          <option v-for="status in uniqueStatuses" :key="status" :value="status">{{ status }}</option>
-        </select>
-        <div class="px-4 py-3 rounded-lg bg-[#63cab71f] border border-[#63cab740]">
-          <p class="text-sm font-semibold text-[#63cab7] whitespace-nowrap">
-            {{ filteredActivities.length }} {{ filteredActivities.length === 1 ? 'atividade' : 'atividades' }}
-          </p>
-        </div>
       </section>
 
-      <div v-if="activities.length === 0" class="text-center py-12">
-        <p class="text-gray-400 text-lg">Nenhuma atividade encontrada</p>
+      <!-- VAZIO -->
+      <div v-if="exibindo.length === 0" class="text-center py-12">
+        <p class="text-gray-400 text-lg">
+          {{ activeTab === 'em-andamento' ? 'Nenhuma atividade em andamento' : 'Nenhuma atividade concluída' }}
+        </p>
       </div>
 
+      <!-- GRID DE ATIVIDADES -->
       <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div v-for="activity in filteredActivities" :key="activity.id"
+        <div v-for="activity in exibindo" :key="activity.id"
              @click="openActivityDetails(activity)"
              class="bg-[#111318] border border-white/10 rounded-2xl p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_16px_48px_rgba(0,0,0,0.3)] hover:border-[#63cab780] hover:shadow-[0_0_0_1px_rgba(99,202,183,0.2),0_24px_64px_rgba(99,202,183,0.08)] transition-all duration-300 cursor-pointer hover:-translate-y-1">
           <div class="flex items-start justify-between mb-4">
@@ -253,9 +286,12 @@ const stepBack = () => {
               <span>{{ getStatusBadge(activity.status) }}</span>
               {{ activity.status }}
             </span>
-            <span :class="`text-lg font-bold ${getNoteColor(activity.nota)}`">{{ activity.nota }}</span>
+            <span v-if="activity.nota" :class="`text-lg font-bold ${getNoteColor(activity.nota)}`">{{ activity.nota }}</span>
+            <span v-else class="text-lg font-bold text-gray-500">—</span>
           </div>
+
           <h3 class="text-base font-bold text-[#e8eaf0] mb-3 line-clamp-2 min-h-[2.5rem]">{{ activity.nameActivities }}</h3>
+
           <div class="mb-4 pb-4 border-b border-white/10">
             <div class="flex justify-between items-center mb-2">
               <span class="text-xs text-gray-500 font-semibold uppercase">Tentativas</span>
@@ -265,6 +301,7 @@ const stepBack = () => {
               <div class="bg-[#63cab7] h-2 rounded-full transition-all duration-300" :style="{ width: `${(activity.tentativa / activity.tentativaTotal) * 100}%` }"></div>
             </div>
           </div>
+
           <div class="space-y-2 text-xs">
             <div class="flex justify-between">
               <span class="text-gray-500">Tipo:</span>
@@ -275,6 +312,7 @@ const stepBack = () => {
               <span class="text-[#63cab7] font-semibold">{{ activity.acao }}</span>
             </div>
           </div>
+
           <div class="mt-4 flex justify-end">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#63cab7]">
               <polyline points="9 18 15 12 9 6"/>
@@ -292,21 +330,18 @@ const stepBack = () => {
 
         <div @click.stop class="relative bg-[#111318] border border-white/10 rounded-2xl shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_25px_50px_rgba(0,0,0,0.5)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
 
-            <div v-if="loading"
-                    class="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
-
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="w-10 h-10 border-4 border-[#63cab7]/30 border-t-[#63cab7] rounded-full animate-spin"></div>
-                        <p class="text-[#63cab7] font-semibold">{{ selectedAI.name }} Resolvendo atividade...</p>
-                    </div>
-
+          <!-- Loading -->
+          <div v-if="loading"
+               class="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 rounded-2xl">
+            <div class="flex flex-col items-center gap-4">
+              <div class="w-10 h-10 border-4 border-[#63cab7]/30 border-t-[#63cab7] rounded-full animate-spin"></div>
+              <p class="text-[#63cab7] font-semibold">{{ selectedAI?.name }} Resolvendo atividade...</p>
             </div>
-
+          </div>
 
           <!-- Header -->
           <div class="sticky top-0 bg-[#111318] border-b border-white/10 flex items-center justify-between p-6 z-10">
             <div class="flex items-center gap-3">
-              <!-- Botão voltar nos steps -->
               <button
                 v-if="modalStep !== 'details'"
                 @click="stepBack"
@@ -321,7 +356,6 @@ const stepBack = () => {
                   <span v-else-if="modalStep === 'ai-choice'">Acessar Atividade</span>
                   <span v-else-if="modalStep === 'ai-select'">Selecionar IA</span>
                 </h2>
-                <!-- Breadcrumb steps -->
                 <div class="flex items-center gap-1.5 mt-1">
                   <span :class="['w-1.5 h-1.5 rounded-full transition-all duration-300', modalStep === 'details' ? 'bg-[#63cab7] w-4' : 'bg-white/20']"></span>
                   <span :class="['w-1.5 h-1.5 rounded-full transition-all duration-300', modalStep === 'ai-choice' ? 'bg-[#63cab7] w-4' : 'bg-white/20']"></span>
@@ -337,135 +371,64 @@ const stepBack = () => {
             </button>
           </div>
 
-          <!-- =================== STEP: DETAILS =================== -->
+          <!-- Conteúdo do Modal (igual ao original, mantendo os steps) -->
           <transition name="step">
-            <div v-if="modalStep === 'details'" key="details">
-              <div class="p-6 space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                  <div class="bg-white/5 border rounded-lg p-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Status</p>
-                    <div :class="`inline-flex items-center gap-2 rounded-md text-sm font-bold px-3 py-2 ${getStatusColor(selectedActivity.status).bg} ${getStatusColor(selectedActivity.status).text} border ${getStatusColor(selectedActivity.status).border}`">
-                      {{ getStatusBadge(selectedActivity.status) }} {{ selectedActivity.status }}
-                    </div>
-                  </div>
-                  <div class="bg-white/5 border rounded-lg p-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Nota Final</p>
-                    <p :class="`text-3xl font-bold ${getNoteColor(selectedActivity.nota)}`">{{ selectedActivity.nota }}</p>
+            <div v-if="modalStep === 'details'" key="details" class="p-6 space-y-6">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white/5 border rounded-lg p-4">
+                  <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Status</p>
+                  <div :class="`inline-flex items-center gap-2 rounded-md text-sm font-bold px-3 py-2 ${getStatusColor(selectedActivity.status).bg} ${getStatusColor(selectedActivity.status).text} border ${getStatusColor(selectedActivity.status).border}`">
+                    {{ getStatusBadge(selectedActivity.status) }} {{ selectedActivity.status }}
                   </div>
                 </div>
-
-                <div>
-                  <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Nome da Atividade</label>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-[#e8eaf0] text-base leading-relaxed">{{ selectedActivity.nameActivities }}</p>
-                  </div>
+                <div class="bg-white/5 border rounded-lg p-4">
+                  <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Nota Final</p>
+                  <p v-if="selectedActivity.nota" :class="`text-3xl font-bold ${getNoteColor(selectedActivity.nota)}`">{{ selectedActivity.nota }}</p>
+                  <p v-else class="text-3xl font-bold text-gray-500">—</p>
                 </div>
+              </div>
 
-                <div>
-                  <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Disciplina</label>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-[#e8eaf0]">{{ selectedActivity.nameDisciplina }}</p>
-                  </div>
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Nome da Atividade</label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <p class="text-[#e8eaf0] text-base leading-relaxed">{{ selectedActivity.nameActivities }}</p>
                 </div>
+              </div>
 
-                <div>
-                  <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Progresso de Tentativas</label>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <div class="flex justify-between items-center mb-3">
-                      <p class="text-[#e8eaf0] font-bold">{{ selectedActivity.tentativa }} de {{ selectedActivity.tentativaTotal }}</p>
-                      <p class="text-[#63cab7] font-bold">{{ Math.round((selectedActivity.tentativa / selectedActivity.tentativaTotal) * 100) }}%</p>
-                    </div>
-                    <div class="w-full bg-white/10 rounded-full h-3">
-                      <div class="bg-[#63cab7] h-3 rounded-full" :style="{ width: `${(selectedActivity.tentativa / selectedActivity.tentativaTotal) * 100}%` }"></div>
-                    </div>
-                  </div>
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Disciplina</label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <p class="text-[#e8eaf0]">{{ selectedActivity.nameDisciplina }}</p>
                 </div>
+              </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">ID da Atividade</label>
-                    <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
-                      <p class="text-[#e8eaf0] font-mono text-sm">{{ selectedActivity.id }}</p>
-                      <button @click="copyToClipboard(selectedActivity.id, 'ID')" class="opacity-0 group-hover:opacity-100 text-[#63cab7] transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                      </button>
-                    </div>
+              <div>
+                <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Progresso de Tentativas</label>
+                <div class="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <div class="flex justify-between items-center mb-3">
+                    <p class="text-[#e8eaf0] font-bold">{{ selectedActivity.tentativa }} de {{ selectedActivity.tentativaTotal }}</p>
+                    <p class="text-[#63cab7] font-bold">{{ Math.round((selectedActivity.tentativa / selectedActivity.tentativaTotal) * 100) }}%</p>
                   </div>
-                  <div>
-                    <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">ID Avaliação</label>
-                    <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
-                      <p class="text-[#e8eaf0] font-mono text-sm">{{ selectedActivity.idAvaliacao }}</p>
-                      <button @click="copyToClipboard(selectedActivity.idAvaliacao, 'ID Avaliação')" class="opacity-0 group-hover:opacity-100 text-[#63cab7] transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Sala Virtual</label>
-                    <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
-                      <p class="text-[#e8eaf0] font-mono text-sm">{{ selectedActivity.idSalaVirtual }}</p>
-                      <button @click="copyToClipboard(selectedActivity.idSalaVirtual, 'Sala Virtual')" class="opacity-0 group-hover:opacity-100 text-[#63cab7] transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">ID Usuário</label>
-                    <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
-                      <p class="text-[#e8eaf0] font-mono text-sm">{{ selectedActivity.idUsuario }}</p>
-                      <button @click="copyToClipboard(selectedActivity.idUsuario, 'ID Usuário')" class="opacity-0 group-hover:opacity-100 text-[#63cab7] transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-2">Código da Atividade</label>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center justify-between group">
-                    <p class="text-[#63cab7] font-mono text-sm break-all">{{ selectedActivity.cID }}</p>
-                    <button @click="copyToClipboard(selectedActivity.cID, 'Código')" class="opacity-0 group-hover:opacity-100 text-[#63cab7] transition-all duration-200 flex-shrink-0 ml-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Tipo</p>
-                    <p class="text-[#e8eaf0] font-bold">{{ selectedActivity.nomeClassificacaoTipo }}</p>
-                  </div>
-
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Ação</p>
-                    <p class="text-[#63cab7] font-bold">{{ selectedActivity.acao }}</p>
-                  </div>
-
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Questões</p>
-                    <p :class="selectedActivity.questoesGeradas ? 'text-green-400 font-bold' : 'text-gray-400'">
-                      {{ selectedActivity.questoesGeradas ? 'Geradas' : 'Não geradas' }}
-                    </p>
-                  </div>
-
-
-                  <div v-if="selectedActivity.cIdAvaliacaoVinculada" class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Avaliação Vinculada</p>
-                    <p class="text-[#e8eaf0] font-mono text-xs break-all">{{ selectedActivity.cIdAvaliacaoVinculada }}</p>
+                  <div class="w-full bg-white/10 rounded-full h-3">
+                    <div class="bg-[#63cab7] h-3 rounded-full" :style="{ width: `${(selectedActivity.tentativa / selectedActivity.tentativaTotal) * 100}%` }"></div>
                   </div>
                 </div>
               </div>
 
-              <!-- Footer step details -->
               <div class="sticky bottom-0 bg-[#111318] border-t border-white/10 flex gap-3 p-6">
                 <button @click="closeActivityDetails" class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] hover:bg-white/10 font-bold transition-colors duration-200">
                   Fechar
                 </button>
-                <button @click="goToAiChoice" class="flex-1 px-4 py-3 rounded-lg border border-[#63cab7]/50 text-[#63cab7] hover:bg-[#63cab7]/10 font-bold transition-colors duration-200">
-                  Acessar Atividade
+                <button
+                    @click="goToAiChoice"
+                    :disabled="selectedActivity.tentativa >= selectedActivity.tentativaTotal"
+                    :class="[
+                        'flex-1 px-4 py-3 rounded-lg font-bold transition-colors duration-200',
+                        selectedActivity.tentativa >= selectedActivity.tentativaTotal
+                        ? 'border border-white/10 text-gray-500 bg-white/5 cursor-not-allowed opacity-50'
+                        : 'border border-[#63cab7]/50 text-[#63cab7] hover:bg-[#63cab7]/10'
+                    ]">
+                    Acessar Atividade
                 </button>
                 <button @click="Activityattempts(selectedActivity)" class="flex-1 px-4 py-3 rounded-lg bg-[#63cab7] text-[#0a1a17] hover:bg-[#5ab5a8] font-bold transition-colors duration-200">
                   Ver Tentativas
@@ -474,102 +437,50 @@ const stepBack = () => {
             </div>
           </transition>
 
-          <!-- =================== STEP: AI CHOICE =================== -->
+          <!-- STEPS AI (igual ao original) -->
           <transition name="step">
-            <div v-if="modalStep === 'ai-choice'" key="ai-choice">
-              <div class="p-6 space-y-6">
+            <div v-if="modalStep === 'ai-choice'" key="ai-choice" class="p-6 space-y-6">
+              <!-- Conteúdo igual ao original -->
+              <div class="text-center py-2">
+                <h3 class="text-xl font-bold text-[#e8eaf0] mb-2">Como deseja realizar esta atividade?</h3>
+                <p class="text-gray-400 text-sm">Você pode fazer de forma independente ou com ajuda de IA</p>
+              </div>
 
-                <!-- Info da atividade resumida -->
-                <div class="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
-                  <div class="w-10 h-10 rounded-lg bg-[#63cab7]/20 border border-[#63cab7]/30 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#63cab7" stroke-width="2">
-                      <path d="M9 11l3 3L22 4"/>
-                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                    </svg>
-                  </div>
-                  <div class="min-w-0">
-                    <p class="text-[#e8eaf0] font-semibold text-sm truncate">{{ selectedActivity.nameActivities }}</p>
-                    <p class="text-gray-500 text-xs mt-0.5">{{ selectedActivity.nameDisciplina }}</p>
-                  </div>
-                </div>
-
-                <!-- Pergunta -->
-                <div class="text-center py-2">
-                  <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#63cab7]/20 to-[#63cab7]/5 border border-[#63cab7]/20 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#63cab7" stroke-width="1.5">
-                      <path d="M12 2a10 10 0 1 0 10 10"/>
-                      <path d="M12 6v6l4 2"/>
-                      <path d="M18 2l4 4-4 4"/>
-                      <path d="M22 2l-4 4"/>
-                    </svg>
-                  </div>
-                  <h3 class="text-xl font-bold text-[#e8eaf0] mb-2">Como deseja realizar esta atividade?</h3>
-                  <p class="text-gray-400 text-sm max-w-sm mx-auto">Você pode fazer a atividade de forma independente ou contar com o auxílio de uma IA.</p>
-                </div>
-
-                <!-- Opções -->
-                <div class="grid grid-cols-1 gap-4">
-
-                  <!-- Com IA -->
-                  <button
-                    @click="chooseWithAI"
-                    class="group relative w-full text-left rounded-xl border border-white/10 bg-white/5 hover:border-[#63cab7]/60 hover:bg-[#63cab7]/5 transition-all duration-200 overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-r from-[#63cab7]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    <div class="relative flex items-center gap-4 p-5">
-                      <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#63cab7]/25 to-[#63cab7]/10 border border-[#63cab7]/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#63cab7" stroke-width="1.5">
-                          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                          <path d="M2 17l10 5 10-5"/>
-                          <path d="M2 12l10 5 10-5"/>
-                        </svg>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-[#e8eaf0] font-bold text-base">Realizar com IA</p>
-                        <p class="text-gray-400 text-sm mt-0.5">Escolha um modelo de IA para te auxiliar durante a atividade</p>
-                      </div>
-                      <div class="flex items-center gap-1.5 flex-shrink-0">
-                        <span class="text-xs font-semibold text-[#63cab7] bg-[#63cab7]/10 border border-[#63cab7]/20 px-2 py-0.5 rounded-full">Recomendado</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#63cab7" stroke-width="2" class="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200">
-                          <polyline points="9 18 15 12 9 6"/>
-                        </svg>
-                      </div>
+              <div class="grid grid-cols-1 gap-4">
+                <button @click="chooseWithAI" class="group relative w-full text-left rounded-xl border border-white/10 bg-white/5 hover:border-[#63cab7]/60 hover:bg-[#63cab7]/5 transition-all duration-200 overflow-hidden p-5">
+                  <div class="relative flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#63cab7]/25 to-[#63cab7]/10 border border-[#63cab7]/30 flex items-center justify-center">
+                      <span>🤖</span>
                     </div>
-                  </button>
-
-                  <!-- Sem IA -->
-                  <button
-                    @click="chooseWithoutAI"
-                    class="group relative w-full text-left rounded-xl border border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/8 transition-all duration-200 overflow-hidden">
-                    <div class="relative flex items-center gap-4 p-5">
-                      <div class="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8eaf0" stroke-width="1.5">
-                          <circle cx="12" cy="12" r="10"/>
-                          <path d="M12 8v4"/>
-                          <path d="M12 16h.01"/>
-                        </svg>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-[#e8eaf0] font-bold text-base">Realizar sem IA</p>
-                        <p class="text-gray-400 text-sm mt-0.5">Acesse a atividade de forma independente, sem auxílio</p>
-                      </div>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" class="group-hover:stroke-[#e8eaf0] group-hover:translate-x-0.5 transition-all duration-200">
-                        <polyline points="9 18 15 12 9 6"/>
-                      </svg>
+                    <div class="flex-1">
+                      <p class="text-[#e8eaf0] font-bold text-base">Realizar com IA</p>
+                      <p class="text-gray-400 text-sm mt-0.5">Escolha um modelo de IA para auxiliar</p>
                     </div>
-                  </button>
+                  </div>
+                </button>
 
-                </div>
+                <button @click="chooseWithoutAI" class="group relative w-full text-left rounded-xl border border-white/10 bg-white/5 hover:border-white/25 hover:bg-white/8 transition-all duration-200 p-5">
+                  <div class="relative flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
+                      <span>👤</span>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[#e8eaf0] font-bold text-base">Realizar sem IA</p>
+                      <p class="text-gray-400 text-sm mt-0.5">Acesse de forma independente</p>
+                    </div>
+                  </div>
+                </button>
               </div>
 
               <div class="sticky bottom-0 bg-[#111318] border-t border-white/10 p-6">
-                <button @click="closeActivityDetails" class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] hover:bg-white/10 font-bold transition-colors duration-200">
+                <button @click="closeActivityDetails" class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] hover:bg-white/10 font-bold">
                   Cancelar
                 </button>
               </div>
             </div>
           </transition>
 
-          <!-- =================== STEP: AI SELECT =================== -->
+          <!-- AI SELECT STEP (igual ao original) -->
           <transition name="step">
             <div v-if="modalStep === 'ai-select'" key="ai-select">
               <div class="p-6 space-y-5">
@@ -681,13 +592,5 @@ const stepBack = () => {
 .step-leave-to {
   opacity: 0;
   transform: translateX(-16px);
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: all 0.2s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
 }
 </style>

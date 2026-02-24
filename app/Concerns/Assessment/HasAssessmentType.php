@@ -49,7 +49,10 @@ trait HasAssessmentType {
             'id' => $id,
             'rkg' => fake()->imageUrl(),
         ]);
-        dd($response->json());
+
+        if ($response->status() != 201 and $response->status() != 200) {
+            return null;
+        }
         return $response['avaliacaoUsuarioToken']; // depois crio um dto
     }
 }

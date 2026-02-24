@@ -13,10 +13,10 @@ const props = defineProps({
     default: 'Atividade'
   },
   idSalaVirtualOfertaAproveitamento: {
-    type: String
+    type: [ String, Number ]
   },
   idSalaVirtual: {
-    type: String
+    type: [ String, Number ]
   },
   typeExam : {
     type: String
@@ -53,8 +53,6 @@ const progressPercent = computed(() => {
 const answeredCount = computed(() => {
   return Object.keys(selectedAnswers.value).length
 })
-
-const userInitial = computed(() => 'U')
 
 // Métodos
 const handleSelectAlternative = (alternativeIndex) => {
@@ -95,14 +93,6 @@ const handleFinish = async (question, index) => {
   })
 }
 
-const handleLogout = () => {
-  router.post(route('logout'))
-  menuOpen.value = false
-}
-
-const closeMenu = () => {
-  menuOpen.value = false
-}
 </script>
 
 <template>
@@ -121,7 +111,7 @@ const closeMenu = () => {
     <div class="relative z-10 max-w-6xl mx-auto p-6">
         <page-header
         :title="activityTitle"
-        :subtitle="`Questão ${currentQuestionNumber} de ${total}`"/>
+        :subtitle="`Questão ${currentQuestionNumber} de ${totalQuestions}`"/>
 
         <div class="mt-6 space-y-3 mb-6">
           <div class="flex items-center justify-between">

@@ -1,6 +1,7 @@
 <?php
 namespace App\Domain\DTOs\Assessment;
 
+use Carbon\Carbon;
 use InvalidArgumentException;
 
 readonly class ActivityDTO {
@@ -20,6 +21,8 @@ readonly class ActivityDTO {
         public string|null $status,
         public string|null $acao,
         public string $nomeClassificacaoTipo,
+        public Carbon $dataInicio,
+        public Carbon $dataFim,
     )
     {}
 
@@ -27,13 +30,13 @@ readonly class ActivityDTO {
         if(!$request['idAvaliacao']) {
             throw new InvalidArgumentException('Atividade não encontrada!!');
         }
-        
+
         return new self(
             id: $request['id'],
             idAvaliacao: $request['idAvaliacao'],
             idUsuario: $request['idUsuario'],
             idSalaVirtual: $request['salas'][0]['idSalaVirtual'],
-            cID: $request['avaliacao']['cID'],
+            cID: $request['cIdAvaliacao'],
             cIdAvaliacaoVinculada: $request['cIdAvaliacaoVinculada'],
             tentativa: $request['tentativa'],
             tentativaTotal: $request['tentativaTotal'],
@@ -44,6 +47,8 @@ readonly class ActivityDTO {
             status: $request['status'],
             acao: $request['acao'],
             nomeClassificacaoTipo: $request['avaliacao']['nomeClassificacaoTipo'],
+            dataInicio: Carbon::parse($request['dataInicio']),
+            dataFim: Carbon::parse($request['dataFim'])
         );
     }
 }

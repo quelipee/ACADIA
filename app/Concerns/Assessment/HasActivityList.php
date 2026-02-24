@@ -25,3 +25,4 @@ trait HasActivityList {
         return $list_activities;
     }
 }
+
