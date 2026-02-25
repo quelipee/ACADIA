@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { router } from '@inertiajs/vue3'
 import PageHeader from '../../components/layout/PageHeader.vue'
 
@@ -12,6 +12,10 @@ const { activities, idSalaVirtualOfertaAproveitamento } = defineProps({
     type: [Number, String],
     required: true
   }
+})
+
+onMounted(() => {
+    console.log(activities)
 })
 
 // Estado
@@ -414,17 +418,17 @@ const stepBack = () => {
                   </div>
                 </div>
               </div>
-
+<!-- LEMBRAR QUE NAO PODE ACESSAR A ATIVIDADE SE A DATA DE TERMINO DELA FOR MENOR QUE A DATA DE HOJE -->
               <div class="sticky bottom-0 bg-[#111318] border-t border-white/10 flex gap-3 p-6">
                 <button @click="closeActivityDetails" class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] hover:bg-white/10 font-bold transition-colors duration-200">
                   Fechar
                 </button>
                 <button
                     @click="goToAiChoice"
-                    :disabled="selectedActivity.tentativa >= selectedActivity.tentativaTotal"
+                    :disabled="selectedActivity.tentativa >= selectedActivity.tentativaTotal && selectedActivity.status != `Aguardando início`"
                     :class="[
                         'flex-1 px-4 py-3 rounded-lg font-bold transition-colors duration-200',
-                        selectedActivity.tentativa >= selectedActivity.tentativaTotal
+                        selectedActivity.tentativa >= selectedActivity.tentativaTotal && selectedActivity.status != `Aguardando início`
                         ? 'border border-white/10 text-gray-500 bg-white/5 cursor-not-allowed opacity-50'
                         : 'border border-[#63cab7]/50 text-[#63cab7] hover:bg-[#63cab7]/10'
                     ]">

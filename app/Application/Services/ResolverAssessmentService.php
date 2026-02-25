@@ -3,13 +3,13 @@
 namespace App\Application\Services;
 
 use App\Concerns\Assessment\HasAssessmentType;
-use App\Domain\Contracts\AIClientInterface;
 use App\Domain\Contracts\FaculdadeClientInterface;
+use App\Domain\DTOs\Assessment\AnswerKeyDTO;
+use App\Domain\DTOs\Assessment\QuestionDTO;
 use App\Domain\Enums\AiProvider;
 use App\Domain\Enums\ExamActivityType;
 use App\Infrastructure\Http\Assessment\Factories\AiProviderFactory;
 use App\Infrastructure\Http\Assessment\Factories\ExamClientFactory;
-use Inertia\Inertia;
 use InvalidArgumentException;
 
 class ResolverAssessmentService {
@@ -127,5 +127,17 @@ class ResolverAssessmentService {
         }
 
         return $questionsFormmated;
+    }
+
+    public function get_answer_key_list(array $disciplinaAttempt)  {
+        $type = ExamActivityType::from($disciplinaAttempt['data']['nomeClassificacaoTipo']);
+        $clientService = $this->factory->make($type);
+
+        $list =  $clientService->listAllQuestion($disciplinaAttempt['data']['id'], null);
+        foreach ($list as $data) {
+            $questionsFormmated[] = AnswerKeyDTO::fromApi($data);
+        }
+
+        return  $questionsFormmated;
     }
 }

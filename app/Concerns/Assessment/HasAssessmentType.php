@@ -7,12 +7,6 @@ use App\Domain\DTOs\Assessment\ApolAttemptDTO;
 use InvalidArgumentException;
 
 trait HasAssessmentType {
-
-    public function __construct(
-        private readonly FaculdadeClientInterface $http,
-    )
-    {}
-
     /**
      * @throws InvalidArgumentException
      */

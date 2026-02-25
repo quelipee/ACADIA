@@ -11,6 +11,9 @@ readonly class ApolAttemptDTO {
         public int $tentativaTotal,
         public int|null $nota,
         public string|null $status,
+        public string $nomeClassificacaoTipo,
+        public string $cID,
+        public string|null $cIdAvaliacaoVinculada
     )
     {}
 
@@ -23,6 +26,9 @@ readonly class ApolAttemptDTO {
             tentativaTotal: $request['tentativaTotal'],
             nota: $request['nota'],
             status: $request['status'],
+            nomeClassificacaoTipo: $request['avaliacao']['nomeClassificacaoTipo'],
+            cID: $request['cIdAvaliacao'],
+            cIdAvaliacaoVinculada: $request['cIdAvaliacaoVinculada']
         );
     }
 }

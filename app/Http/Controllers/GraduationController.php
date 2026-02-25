@@ -82,4 +82,12 @@ class GraduationController extends Controller
         $provider = AiProvider::from($data['ai']);
         $this->resolver->resolverAI($data->toArray(), $provider);
     }
+
+    public function answer_key(Request $request) {
+        $answer_key = $this->resolver->get_answer_key_list($request->toArray());
+
+        return Inertia::render('Graduation/AnswerKey/AnswerKey', [
+            'questoes' => $answer_key
+        ]);
+    }
 }

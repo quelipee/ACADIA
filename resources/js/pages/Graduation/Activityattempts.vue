@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import PageHeader from '../../components/layout/PageHeader.vue';
+import { router } from '@inertiajs/vue3';
+
 
 const { attempts } = defineProps({
   attempts: {
@@ -108,6 +110,11 @@ const worstAttempt = computed(() => {
     (prev.nota < current.nota) ? prev : current
   )
 })
+
+const answerkey = (data) => {
+    router.get(`/answer_key/${data.id}`, { data: data })
+}
+
 </script>
 
 <template>
@@ -479,9 +486,14 @@ const worstAttempt = computed(() => {
               Fechar
             </button>
             <button
-              class="flex-1 px-4 py-3 rounded-lg bg-[#63cab7] text-[#0a1a17]
-                     hover:bg-[#5ab5a8] font-bold
-                     transition-colors duration-200">
+            @click="answerkey(selectedAttempt)"
+            :disabled="selectedAttempt.status === 'Aguardando início'"
+            :class="[
+                        'flex-1 px-4 py-3 rounded-lg font-bold transition-colors duration-200',
+                        selectedAttempt.status === 'Aguardando início'
+                        ? 'border border-white/10 text-gray-500 bg-white/5 cursor-not-allowed opacity-50'
+                        : 'border border-[#63cab7]/50 text-[#63cab7] hover:bg-[#63cab7]/10'
+                    ]">
               Ver Gabarito
             </button>
           </div>

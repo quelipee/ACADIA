@@ -40,6 +40,9 @@ Route::middleware(EnsureFaculdadeAuthenticated::class)->group(function () {
     Route::get('/answer_activity/{cID}', [GraduationController::class, 'answer_activity'])
     ->name('answer_activity');
 
+    Route::get('/answer_key/{idTry}', [GraduationController::class , 'answer_key'])
+    ->name('answer_key');
+
     Route::post('/activities/{activity}/complete', [GraduationController::class , 'handleFormSubmit'])
     ->name('handleFormSubmit');
 

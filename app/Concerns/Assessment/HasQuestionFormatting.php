@@ -2,9 +2,15 @@
 
 namespace App\Concerns\Assessment;
 
+use App\Domain\Contracts\FaculdadeClientInterface;
 use App\Domain\DTOs\Assessment\QuestionDTO;
 
 trait HasQuestionFormatting {
+
+    public function __construct(
+        private readonly FaculdadeClientInterface $http,
+    )
+    {}
 
     public function hasQuestionFormatting(array $question) {
         return QuestionDTO::fromApi($question);

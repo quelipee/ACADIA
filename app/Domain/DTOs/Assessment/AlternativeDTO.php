@@ -2,6 +2,8 @@
 
 namespace App\Domain\DTOs\Assessment;
 
+use App\Support\TextFormatter;
+
 readonly class AlternativeDTO {
     public function __construct(
         public int $id,
@@ -14,7 +16,7 @@ readonly class AlternativeDTO {
         return new self(
             id: $data['questaoAlternativaAtributos'][0]['id'],
             idQuestaoAlternativa: $data['questaoAlternativaAtributos'][0]['idQuestaoAlternativa'],
-            valor: QuestionDTO::formattedText($data['questaoAlternativaAtributos'][0]['valor']),
+            valor: TextFormatter::format($data['questaoAlternativaAtributos'][0]['valor']),
         );
     }
 }
