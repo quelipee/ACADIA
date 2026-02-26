@@ -171,17 +171,11 @@ const chooseWithoutAI = () => {
   confirmAccess()
 }
 
-const getActivityId = (activity) => {
-  return activity.nomeClassificacaoTipo === 'Discursiva'
-    ? activity.cIdAvaliacaoVinculada
-    : activity.cID
-}
-
 const confirmAccess = () => {
   if (!selectedActivity.value) return
 
   if (!useAI.value) {
-    router.get(`/answer_activity/${getActivityId(selectedActivity.value)}`, {
+    router.get(`/answer_activity/${selectedActivity.value.id}`, {
       data: selectedActivity.value,
       idSalaVirtualOfertaAproveitamento
     })
@@ -191,10 +185,10 @@ const confirmAccess = () => {
   if (useAI.value && selectedAI.value) {
     loading.value = true
 
-    router.post(`/answer_activity/${selectedAI.value.name}/${getActivityId(selectedActivity.value)}`, {
+    router.post(`/answer_activity/${selectedAI.value.name}/${selectedActivity.value.id}`, {
       ai: selectedAI.value.id,
-      data: selectedActivity.value
-    //   idSalaVirtualOfertaAproveitamento
+      data: selectedActivity.value,
+      idSalaVirtualOfertaAproveitamento
     }, {
       preserveState: false,
       onSuccess: () => {
@@ -207,12 +201,8 @@ const confirmAccess = () => {
   }
 }
 
-const copyToClipboard = (text) => {
-  navigator.clipboard.writeText(text)
-}
-
 const Activityattempts = (data) => {
-  router.get(`/activity_attempts/${data.cID}`)
+  router.get(`/activity_attempts/${data.id}`, { data })
 }
 
 const stepBack = () => {
@@ -432,16 +422,10 @@ const isDisabled = computed(() => {
               </div>
 <!-- LEMBRAR QUE NAO PODE ACESSAR A ATIVIDADE SE A DATA DE TERMINO DELA FOR MENOR QUE A DATA DE HOJE -->
               <div class="sticky bottom-0 bg-[#111318] border-t border-white/10 flex gap-3 p-6">
+
                 <button @click="closeActivityDetails" class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] hover:bg-white/10 font-bold transition-colors duration-200">
                   Fechar
                 </button>
-
-
-                <!-- <button
-                    @click="goToAiChoice">
-                    Acessar Atividade
-                </button> -->
-
 
                 <button
                     @click="goToAiChoice"
@@ -454,9 +438,11 @@ const isDisabled = computed(() => {
                     ]">
                     Acessar Atividade
                 </button>
+
                 <button @click="Activityattempts(selectedActivity)" class="flex-1 px-4 py-3 rounded-lg bg-[#63cab7] text-[#0a1a17] hover:bg-[#5ab5a8] font-bold transition-colors duration-200">
                   Ver Tentativas
                 </button>
+
               </div>
             </div>
           </transition>

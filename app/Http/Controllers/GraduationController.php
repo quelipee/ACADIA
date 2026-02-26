@@ -45,8 +45,8 @@ class GraduationController extends Controller
         ]);
     }
 
-    public function activity_attempts(string $cId) {
-        $data = $this->resolver->attempts($cId);
+    public function activity_attempts(Request $request) {
+        $data = $this->resolver->attempts($request['data']['cID']);
 
         return Inertia::render('Graduation/Activityattempts',[
             'attempts' => $data
