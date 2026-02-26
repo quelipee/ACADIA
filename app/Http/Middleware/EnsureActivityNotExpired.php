@@ -20,13 +20,12 @@ class EnsureActivityNotExpired
         $nowDate = Carbon::now();
         $try = (int) $request['data']['tentativa'];
         $tryTotal = (int) $request['data']['tentativaTotal'];
+        $status = $request['data']['status'];
 
         $isExpired = $endDate->lessThanOrEqualTo($nowDate);
-        $triesExceeded = $try > $tryTotal;
-        $isFinalized = ($request['data']['status'] === 'Finalizada' || $request['data']['acao'] === 'Gabarito');
+        $triesExceeded = $status !== 'Aguardando início' && $try >= $tryTotal;
 
-        if ($isExpired || $isFinalized || $triesExceeded) {
-
+        if ($isExpired || $triesExceeded) {
             return redirect()->route('activities', [
                 'id' => $request['data']['idSalaVirtual'],
                 'idSalaVirtual' => $request['idSalaVirtualOfertaAproveitamento'],
