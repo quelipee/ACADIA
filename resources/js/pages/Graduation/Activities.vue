@@ -14,10 +14,6 @@ const { activities, idSalaVirtualOfertaAproveitamento } = defineProps({
   }
 })
 
-onMounted(() => {
-    console.log(activities)
-})
-
 // Estado
 const loading = ref(false)
 const selectedActivity = ref(null)
@@ -198,6 +194,7 @@ const confirmAccess = () => {
     router.post(`/answer_activity/${selectedAI.value.name}/${getActivityId(selectedActivity.value)}`, {
       ai: selectedAI.value.id,
       data: selectedActivity.value
+    //   idSalaVirtualOfertaAproveitamento
     }, {
       preserveState: false,
       onSuccess: () => {
@@ -222,6 +219,21 @@ const stepBack = () => {
   if (modalStep.value === 'ai-select') modalStep.value = 'ai-choice'
   else if (modalStep.value === 'ai-choice') modalStep.value = 'details'
 }
+
+const isDisabled = computed(() => {
+    if (!selectedActivity.value) return true
+
+    const terminouTentativas = selectedActivity.value.tentativa >= selectedActivity.value.tentativaTotal
+
+    const naoEstaAguardando = selectedActivity.value.status != `Aguardando início`
+
+    const dataFim = new Date(selectedActivity.value.dataFim)
+    const agora = new Date()
+
+    const atividadeEncerrada = dataFim < agora
+
+    return terminouTentativas && naoEstaAguardando || atividadeEncerrada
+})
 </script>
 
 <template>
@@ -423,12 +435,20 @@ const stepBack = () => {
                 <button @click="closeActivityDetails" class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-[#e8eaf0] hover:bg-white/10 font-bold transition-colors duration-200">
                   Fechar
                 </button>
+
+
+                <!-- <button
+                    @click="goToAiChoice">
+                    Acessar Atividade
+                </button> -->
+
+
                 <button
                     @click="goToAiChoice"
-                    :disabled="selectedActivity.tentativa >= selectedActivity.tentativaTotal && selectedActivity.status != `Aguardando início`"
+                    :disabled="isDisabled"
                     :class="[
                         'flex-1 px-4 py-3 rounded-lg font-bold transition-colors duration-200',
-                        selectedActivity.tentativa >= selectedActivity.tentativaTotal && selectedActivity.status != `Aguardando início`
+                        isDisabled
                         ? 'border border-white/10 text-gray-500 bg-white/5 cursor-not-allowed opacity-50'
                         : 'border border-[#63cab7]/50 text-[#63cab7] hover:bg-[#63cab7]/10'
                     ]">

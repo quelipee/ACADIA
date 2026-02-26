@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GraduationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\EnsureActivityNotExpired;
 use App\Http\Middleware\EnsureFaculdadeAuthenticated;
 use App\Http\Middleware\RedirectIfFaculdadeAuthenticated;
 use Illuminate\Support\Facades\Route;
@@ -38,7 +38,7 @@ Route::middleware(EnsureFaculdadeAuthenticated::class)->group(function () {
     ->name('activity_attempts');
 
     Route::get('/answer_activity/{cID}', [GraduationController::class, 'answer_activity'])
-    ->name('answer_activity');
+    ->name('answer_activity')->middleware(EnsureActivityNotExpired::class);
 
     Route::get('/answer_key/{idTry}', [GraduationController::class , 'answer_key'])
     ->name('answer_key');
@@ -50,5 +50,5 @@ Route::middleware(EnsureFaculdadeAuthenticated::class)->group(function () {
     ->name('selected_alternative');
 
     Route::post('/answer_activity/{ai}/{cID}', [GraduationController::class, 'answer_activity_ai'])
-    ->name('answer_activity_ai');
+    ->name('answer_activity_ai')->middleware(EnsureActivityNotExpired::class);
 });
