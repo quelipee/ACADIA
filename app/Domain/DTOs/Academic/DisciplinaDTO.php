@@ -12,6 +12,8 @@ readonly class DisciplinaDTO {
         public int|null $idSalaVirtualOfertaAproveitamento,
         public string $nome,
         public bool $statusConcluido,
+        public bool $vigente,
+        public bool $ofertaFlexivel
     )
     {}
 
@@ -30,7 +32,9 @@ readonly class DisciplinaDTO {
             idSalaVirtualOfertaAtual: $request['idSalaVirtualOfertaAtual'],
             idSalaVirtualOfertaAproveitamento: $idSalaVirtualOfertaAproveitamento,
             nome: $request['nome'],
-            statusConcluido: $request['statusConcluido']
+            statusConcluido: $request['statusConcluido'],
+            vigente: $request['vigente'],
+            ofertaFlexivel: $request['ofertaFlexivel']
         );
     }
 }

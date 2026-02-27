@@ -28,6 +28,11 @@ class Disciplina implements DisciplinaClientInterface{
             $list_disciplina[] = DisciplinaDTO::fromApi($subject);
         }
 
+        $list_disciplina = collect($list_disciplina)
+        ->where('ofertaFlexivel',  false)
+        ->values()
+        ->toArray();
+
         return $list_disciplina;
     }
 }

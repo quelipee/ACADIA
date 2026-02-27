@@ -56,6 +56,22 @@ const copyToClipboard = (text, label) => {
   navigator.clipboard.writeText(text)
   console.log(`✅ ${label} copiado!`)
 }
+
+// Verificar se pode acessar (vigente === true)
+const canAccessActivity = (subject) => {
+  return subject.vigente === true || subject.vigente === 1
+}
+
+// Get status badge
+const getStatusBadge = (subject) => {
+  if (subject.statusConcluido) {
+    return { text: 'Concluída', color: 'bg-green-500/20 text-green-400', icon: '✓' }
+  }
+  if (!canAccessActivity(subject)) {
+    return { text: 'DP / Reprovado', color: 'bg-red-500/20 text-red-400', icon: '⚠️' }
+  }
+  return null
+}
 </script>
 
 <template>
@@ -174,16 +190,14 @@ const copyToClipboard = (text, label) => {
                     hover:border-[#63cab780]
                     hover:shadow-[0_0_0_1px_rgba(99,202,183,0.2),0_24px_64px_rgba(99,202,183,0.08)]
                     transition-all duration-300 cursor-pointer
-                    hover:-translate-y-1 relative">
+                    hover:-translate-y-1 relative"
+             :class="{ 'opacity-75': !canAccessActivity(subject) }">
 
           <!-- Indicador de status (canto superior direito) -->
-          <div v-if="subject.statusConcluido" class="absolute top-4 right-4">
-            <span class="inline-flex items-center gap-1 bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              Concluída
+          <div v-if="getStatusBadge(subject)" class="absolute top-4 right-4">
+            <span :class="`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(subject).color}`">
+              <span>{{ getStatusBadge(subject).icon }}</span>
+              {{ getStatusBadge(subject).text }}
             </span>
           </div>
 
@@ -255,9 +269,14 @@ const copyToClipboard = (text, label) => {
           <div class="flex items-center justify-between p-6 border-b border-white/10">
             <div>
               <h2 class="text-2xl font-bold text-[#e8eaf0]">Detalhes da Matéria</h2>
-              <p v-if="selectedSubject.statusConcluido" class="text-sm text-green-400 font-semibold mt-1">
-                ✓ Disciplina Concluída
-              </p>
+              <div class="flex items-center gap-2 mt-1">
+                <p v-if="selectedSubject.statusConcluido" class="text-sm text-green-400 font-semibold">
+                  ✓ Concluída
+                </p>
+                <p v-else-if="!canAccessActivity(selectedSubject)" class="text-sm text-red-400 font-semibold">
+                  ⚠️ DP / Reprovado
+                </p>
+              </div>
             </div>
             <button
               @click="closeSubjectDetails"
@@ -400,8 +419,8 @@ const copyToClipboard = (text, label) => {
               </div>
             </div>
 
-            <!-- Seleção de Tipo de Atividade (apenas se NÃO concluída) -->
-            <div v-if="!selectedSubject.statusConcluido">
+            <!-- Seleção de Tipo de Atividade (apenas se PODE acessar) -->
+            <div v-if="canAccessActivity(selectedSubject) && !selectedSubject.statusConcluido">
               <label class="text-xs text-gray-500 uppercase font-semibold tracking-wider block mb-3">
                 Tipo de Atividade
               </label>
@@ -449,9 +468,16 @@ const copyToClipboard = (text, label) => {
             </div>
 
             <!-- Mensagem para concluídas -->
-            <div v-else class="px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+            <div v-if="selectedSubject.statusConcluido" class="px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-lg">
               <p class="text-sm text-green-400 font-semibold">
                 ✓ Esta disciplina foi concluída com sucesso!
+              </p>
+            </div>
+
+            <!-- Mensagem para DP/Reprovado -->
+            <div v-if="!canAccessActivity(selectedSubject) && !selectedSubject.statusConcluido" class="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p class="text-sm text-red-400 font-semibold">
+                ⚠️ Esta disciplina está como DP ou Reprovado. Não é possível acessar a sala.
               </p>
             </div>
 
@@ -467,7 +493,7 @@ const copyToClipboard = (text, label) => {
               Fechar
             </button>
             <button
-              v-if="!selectedSubject.statusConcluido"
+              v-if="canAccessActivity(selectedSubject) && !selectedSubject.statusConcluido"
               @click="open_activies(selectedSubject, selectedActivityType)"
               class="flex-1 px-4 py-2 rounded-lg bg-[#63cab7] text-[#0a1a17]
                      hover:bg-[#5ab5a8]
@@ -475,12 +501,20 @@ const copyToClipboard = (text, label) => {
               Acessar Sala
             </button>
             <button
-              v-else
+              v-else-if="selectedSubject.statusConcluido"
               disabled
               class="flex-1 px-4 py-2 rounded-lg bg-green-600 text-white
                      cursor-not-allowed opacity-70
                      transition-colors duration-200 font-bold">
               Concluída ✓
+            </button>
+            <button
+              v-else
+              disabled
+              class="flex-1 px-4 py-2 rounded-lg bg-red-600 text-white
+                     cursor-not-allowed opacity-70
+                     transition-colors duration-200 font-bold">
+              DP / Reprovado ⚠️
             </button>
           </div>
 
