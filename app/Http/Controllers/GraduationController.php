@@ -85,7 +85,7 @@ class GraduationController extends Controller
 
     public function answer_key(Request $request) {
         $answer_key = $this->resolver->get_answer_key_list($request->toArray());
-dd($answer_key);
+
         return Inertia::render('Graduation/AnswerKey/AnswerKey', [
             'questoes' => $answer_key
         ]);
